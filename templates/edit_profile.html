@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <style>
         body {
             background-color: #1f1f1f;
@@ -18,9 +19,6 @@
             margin: 20px auto;
         }
 
-        h2 {
-            color: #ff0000;
-        }
 
         form {
             display: flex;
@@ -41,7 +39,6 @@
             color: #ffffff;
         }
         
-     
 
         button {
             padding: 10px;
@@ -56,41 +53,15 @@
             background-color: #45a049;
         }
 
-        .headt {
-            height: 80px;
-            background: url("static/images/loginbg.jpeg") no-repeat;
-            animation: animateBg 50s linear infinite;
-            text-align: center;
-            font-size: 18px;
-            border-top: 1px;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            border-bottom: 2px solid #10ea178f;
-            margin-bottom: 40px;
-            font-family:'Times New Roman', Times, serif;
-            font-size: 40px;
-            text-align: center;
-            display: flex; /* Add this line */
-            align-items: center; /* Add this line */
-            justify-content: center;
-        }
-
-        @keyframes animateBg {
-    0% {
-        background-position-y: 0;
-    }
-    50% {
-        background-position-y: 100%;
-    }
-    100% {
-        background-position-y: 0;
-    }
-}
+        
     </style>
 </head>
 <body>
-    <header class="headt">
-        <h2>STORIA</h2>
+    <header style="max-width: 800px;
+    margin: 20px auto;">
+        <div class="headt">
+            <h2>STORIA</h2>
+        </div>
      </header>
     <main>
         <button onclick="goBack()">Go Back</button>

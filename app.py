@@ -58,9 +58,10 @@ def resize_image(image_path, output_path, size=(200, 200)):
         img.thumbnail(size)
         img.save(output_path)
 
-def convert_to_jpg(image_path, output_path):
-    with Image.open(image_path) as img:
-        img.convert("RGB").save(output_path, "JPEG")
+# Convert to PNG function
+def convert_to_png(input_path, output_path):
+    with Image.open(input_path) as img:
+        img.convert("RGBA").save(output_path, "PNG")
 
 #Classes
 
@@ -639,22 +640,22 @@ def edit_profile(user_id):
                 if profile_pic.filename != '' and allowed_file(profile_pic.filename):
                     # Generate a secure and unique filename
                     filename = secure_filename(profile_pic.filename)
-                    filename = f"user_{user_id}_{filename}"
+                    username_filename = f"{user.username}_profile_pic.png"
 
                     # Save the original image
                     original_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     profile_pic.save(original_path)
 
-                    # Convert the image to JPEG
-                    jpg_path = os.path.join(app.config['UPLOAD_FOLDER'], 'profile_' + filename)
-                    convert_to_jpg(original_path, jpg_path)
+                    # Convert the image to PNG
+                    png_path = os.path.join(app.config['UPLOAD_FOLDER'], username_filename)
+                    convert_to_png(original_path, png_path)
 
                     # Resize the image for the profile picture
-                    profile_pic_path = os.path.join(app.config['UPLOAD_FOLDER'], 'profile_' + filename)
-                    resize_image(jpg_path, profile_pic_path, size=(200, 200))
+                    profile_pic_path = os.path.join(app.config['UPLOAD_FOLDER'], username_filename)
+                    resize_image(png_path, profile_pic_path, size=(200, 200))
 
-                    # Update the user profile pic path in the database
-                    user.profile_pic = 'profile_' + filename
+                    # Update the user profile pic path in the database with the username and PNG extension
+                    user.profile_pic = username_filename
 
                     # Remove the original image
                     os.remove(original_path)
@@ -671,6 +672,7 @@ def edit_profile(user_id):
 
     flash('Permission denied or user not found.', 'error')
     return redirect(url_for('index'))
+
 
 # User relations
 @app.route('/user/relations', methods=['GET'])
