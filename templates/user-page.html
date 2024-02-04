@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    <style>
+        body {
+            background-color: #1f1f1f;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        h2 {
+            color: #b9b9b9;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 20px;
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-username {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .profile-bio {
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        .edit-profile-button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .edit-profile-button:hover {
+            background-color: #45a049;
+        }
+
+        .story {
+            gap: 6px;
+            flex-wrap: wrap;
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        li {
+            display: flex;
+        }
+
+        .story-box {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #333;
+        }
+
+        .author {
+            color: #00ff00;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        h3 {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .synopsis {
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        .content-preview {
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .tags {
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header style="max-width: 800px;
+    margin: 20px auto;">
+        <div class="headt">
+            <h2>STORIA</h2>
+        </div>
+        <div>
+            
+        <ul class="linkli">
+           <li><a class="links" href="{{ url_for('edit_profile', user_id=user.id) }}">Edit Profile</a></li>
+           <li><a class="links" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
+           <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
+           <li><a class="links" href="{{ url_for('user_settings') }}">settings</a></li>
+           <li><a class="links" href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+
+        </div>
+    </header>
+    <main>
+        <div class="profile-info">
+            <div class="profile-image">
+                <img src="{{ url_for('static', filename='images/default_profile_image.jpg') }}" alt="Profile Image">
+            </div>
+            <div class="profile-details">
+                <div class="profile-username">{{ current_user.username }}</div>
+                <p class="profile-bio">{{ current_user.bio }}</p>
+                <a class="edit-profile-button" href="{{ url_for('edit_profile') }}">Edit Profile</a>
+            </div>
+        </div>
+
+        <h2>My Stories</h2>
+
+        <ul class="story">
+            {% for story in user_stories %}
+                <a id="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
+                    <li class="story-box">
+                        <div class="author">{{ story.author.username }}</div>
+                        <h3>{{ story.title }}</h3>
+                        <p class="synopsis">{{ story.synopsis }}</p>
+                        <div class="content-preview">{{ story.content[:10] }}...</div>
+                        <p class="tags">Tags: {{ story.tags }}</p>
+                    </li>
+                </a>
+            {% endfor %}
+        </ul>
+    </main>
+</body>
+</html>

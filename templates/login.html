@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            background: url("static/images/loginbg.jpeg") no-repeat;
+            background-size: cover;
+            background-position: center;
+            animation: animateBg 10s linear infinite;
+        }
+
+        .headt {
+    height: 80px;
+    text-align: center;
+    font-size: 18px;
+    border-top: 1px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom: 2px solid #56f35c8f;
+    margin-bottom: 40px;
+    font-family:'Times New Roman', Times, serif;
+    font-size: 40px;
+    text-align: center;
+    display: flex; /* Add this line */
+    align-items: center; /* Add this line */
+    justify-content: center;
+}
+        .wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    animation: animateBg 10s linear infinite;
+}
+
+        @keyframes animateBg {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .login-form {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            
+            padding: 20px;
+            width: 300px;
+            background: transparent;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,.5);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: auto;
+            margin-top: 100px;
+            color:#fff;
+            background: transparent;
+            -webkit-backdrop-filter: blur(15px); /* For WebKit-based browsers */
+    backdrop-filter: blur(15px)
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-bottom: 1px solid #fff;
+            background: transparent;
+            color: #fff;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .register-link {
+            color: #00ff00;
+            text-decoration: none;
+            margin-top: 15px;
+        }
+  
+        .h2title {
+            font-size: 2em;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .textclr  {
+            color:#fff;
+        }
+
+        .flash-messages {
+            border: 1px solid #555;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #444;
+        }
+       
+    </style>
+</head>
+<body>
+    <header style="max-width: 800px;
+    margin: 20px auto;">
+        <div class="headt">
+            <h2 style="color: #b9b9b9;">STORIA</h2>
+        </div>
+    </header>
+     <main>
+    <div class="wrapper">
+        <div class="login-form">
+            <h2 class="h2title">Login to</br>STORIA</h2>
+        	<form action="{{ url_for('login') }}" method="post">
+                       {{ form.csrf_token }}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label class="textclr" for="username">Username:</label>
+                <input type="text" id="username" name="username"  required>
+
+                <label class="textclr" for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                       <div class="flash-messages">
+                       {% for category, message in messages %}
+                       <div class="flash-message {{ category }}">
+                       {{ message }}
+                       </div>
+                       {% endfor %}
+                       </div>
+                    {% endif %}
+                {% endwith %}
+
+                <button type="submit">Login</button>
+            </form>
+            <p style="margin-bottom: 5px;">Don't have an account? <a href="{{ url_for('register') }}" class="register-link">Register here</a></p> 
+            <p style="margin-top: 0px;">Forgot your password? Click <a class="register-link" href="{{ url_for('request_reset_password') }}">Reset it here</a></p>
+    </div>
+</main>
+</body>
+</html>

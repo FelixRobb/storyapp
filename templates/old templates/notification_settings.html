@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Notification Preferences - {{ current_user.username }}</h2>
+    
+    <form method="post" action="{{ url_for('notification_settings') }}">
+        {{ notification_preferences_form.hidden_tag() }}
+        <label>{{ notification_preferences_form.story_updates }} Receive Story Updates</label><br>
+        <label>{{ notification_preferences_form.comments }} Receive Comments Notifications</label><br>
+        <label>{{ notification_preferences_form.followers }} Receive Followers Notifications</label><br>
+        <button type="submit" class="btn btn-success">Save Preferences</button>
+    </form>
+{% endblock %}

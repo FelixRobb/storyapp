@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Account Settings - {{ current_user.username }}</h2>
+    
+    <form method="post" action="{{ url_for('account_settings') }}">
+        {{ change_password_form.hidden_tag() }}
+        <h3>Change Password</h3>
+        <label for="current_password">Current Password:</label>
+        {{ change_password_form.current_password(class="form-control") }}
+        <label for="new_password">New Password:</label>
+        {{ change_password_form.new_password(class="form-control") }}
+        <label for="confirm_password">Confirm New Password:</label>
+        {{ change_password_form.confirm_password(class="form-control") }}
+        <button type="submit" class="btn btn-success">Change Password</button>
+    </form>
+
+    <form method="post" action="{{ url_for('account_settings') }}">
+        {{ update_email_form.hidden_tag() }}
+        <h3>Update Email</h3>
+        <label for="new_email">New Email:</label>
+        {{ update_email_form.new_email(class="form-control") }}
+        <button type="submit" class="btn btn-success">Update Email</button>
+    </form>
+{% endblock %}

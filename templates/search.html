@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+    <style>
+        body {
+            background-color: #1f1f1f;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 25px;
+        }
+
+        .search-form {
+            display: flex;
+            justify-content: center;
+            background-color: #2b2b2b;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            height:20px; /* Update height to match the input field */
+            align-items: center;
+            height:15px;
+        }
+
+        input {
+            width: 250px;
+            height: 15px;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-form">
+        <form method="post">
+            <label for="search_query">Search:</label>
+            <input type="text" id="search_query" name="search_query" required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</body>
+</html>
