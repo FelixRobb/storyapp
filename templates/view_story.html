@@ -1,120 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ story.title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
-  <style>
+    <style>
+        body {
+            background-color: #1f1f1f;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+
+        p {
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .story-box {
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+
+        .content {
+            margin-bottom: 20px;
+
+        }
+
+        .content-excerpt {
+            border: 2px solid #494949;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            margin: 10px;
+        }
+
+        .buttonedit {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            /* Adjust the font size as needed */
+        }
+
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .button-container {
+            margin-bottom: 20px;
+        }
+
+        .button-container .button {
+            margin-bottom: 10px;
+            /* Adjust the spacing between buttons */
+        }
+
+        .button-container a.button {
+            display: block;
+            margin-top: 10px;
+            /* Separate "Edit Story" link from the buttons */
+        }
+
+        input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .list {
+            padding: 4px;
+        }
+
+        .comment-item {
+            height: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .chapter-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        .chapter-list li {
+            margin-bottom: 5px;
+        }
+
+        #chapterSelect {
+            margin-top: 10px;
+        }
+
+        a[href^="#chapter_"] {
+            display: none;
+        }
+
+        select {
+            background-color: #333;
+            color: #fff;
+            padding: 3px;
+            border-radius: 10px;
+        }
+
+        audio {
+            width: 100%;
+            margin: 10pxs;
+        }
+    </style>
   
-       body {
-    background-color: #1f1f1f;
-    color: #ffffff;
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 20px;
-}
-
-main {
-    max-width: 800px;
-    margin: 20px auto;
-}
-
-
-p {
-    color: #ccc;
-    margin-bottom: 10px;
-}
-
-.story-box {
-    border: 2px solid #00ff00;
-    padding: 20px;
-    margin-bottom: 20px;
-    background-color: #333;
-    border-radius: 8px;
-}
-
-.content {
-    margin-bottom: 20px;
-    
-}
-
-.content-excerpt {
-    border: 2px solid #494949;
-    border-radius: 8px;
-    padding: 10px;
-}
-
-
-
-.button {
-    display: inline-block;
-    padding: 10px 20px;
-    margin-right: 10px;
-    background-color: #4CAF50;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 4px;
-    cursor: pointer;
-    border: none;
-    font-size: 14px; /* Adjust the font size as needed */
-}
-				
-.buttonedit {
-    display: inline-block;
-    padding: 10px 20px;
-    margin-right: 10px;
-    background-color: #4CAF50;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 4px;
-    cursor: pointer;
-    border: none;
-    font-size: 14px; /* Adjust the font size as needed */
-}
-
-
-.button:hover {
-    background-color: #45a049;
-}
-
-.button-container {
-    margin-bottom: 20px;
-}
-
-.button-container .button {
-    margin-bottom: 10px; /* Adjust the spacing between buttons */
-}
-
-.button-container a.button {
-    display: block;
-    margin-top: 10px; /* Separate "Edit Story" link from the buttons */
-}
-
-input {
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #555;
-    border-radius: 4px;
-    background-color: #333;
-    color: #fff;
-}
-
-.list {
-    padding: 4px;
-}
-
-.comment-item {
-    height: 10px;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-
-
-  </style>
 </head>
+
 <body>
     <header style="max-width: 800px;
     margin: 20px auto;">
@@ -128,30 +161,58 @@ input {
             <h2>{{ story.title }}</h2>
             <p><strong>Author:</strong> {{ story.author.username }}</p>
             <p><strong>Synopsis:</strong> {{ story.synopsis }}</p>
+
+            <label for="chapterSelect">Select Chapter:</label>
+            <select id="chapterSelect" onchange="navigateToChapter()">
+                <option value="0">Select a Chapter</option>
+                {% for chapter in chapters %}
+                <option value="{{ chapter.number }}">{{ chapter.title }}</option>
+                {% endfor %}
+            </select>
+
+            <ul class="chapter-list">
+                {% for chapter in chapters %}
+                <li><strong>Chapter {{ chapter.number }}:</strong> {{ chapter.title }}</li>
+                {% endfor %}
+            </ul>
             <p class="content"><strong>Content:</strong></p>
-            <div class="content-excerpt">{{ story.content }}</div>
+            
+            <div class="content-excerpt" id="contentExcerpt">
+                {{ story.content.replace('\n', '<br>')|safe }}
+            </div>
             <p><strong>Tags:</strong> {{ story.tags }}</p>
             <p><strong>Comments:</strong></p>
             <ul class="list">
                 {% for comment in story.comments %}
-                    <li class="comment-item">{{ comment.content }}</li>
+                <li class="comment-item">{{ comment.content }}</li>
                 {% endfor %}
             </ul>
-            
+
             <!-- Display Versions -->
-            <p><strong>Versions:</strong></p>
-            <ul class="list">
-                {% for version in versions %}
-                    <li>{{ version.date }} - {{ version.content }}</li>
-                {% endfor %}
-            </ul>
+            <button class="button" onclick="showVersionsPopup()">Show Versions</button>
+
+            <div id="versionsPopup" class="popup" style="display: none;">
+                <label for="versionSelect">Select Version Date:</label>
+                <select id="versionSelect" onchange="displaySelectedVersion()">
+                    {% for version in versions %}
+                    <option value="{{ version.date }}">{{ version.date }}</option>
+                    {% endfor %}
+                </select>
+
+                <div id="selectedVersionContent">
+                    <!-- Content for the selected version will be displayed here -->
+                </div>
+
+                <button class="button" onclick="closeVersionsPopup()">Close</button>
+            </div>
 
             <!-- Button Container -->
             <div class="button-container">
                 <button class="button" id="toggleCommentForm">Add a Comment</button>
 
                 <!-- Form for adding comments (initially hidden) -->
-                <form id="commentForm" action="{{ url_for('add_comment', story_id=story.id) }}" method="post" style="display: none;">
+                <form id="commentForm" action="{{ url_for('add_comment', story_id=story.id) }}" method="post"
+                    style="display: none;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <label for="comment">Add a Comment:</label>
                     <input type="text" id="comment" name="comment" required>
@@ -163,20 +224,22 @@ input {
         </div>
         <!-- Display Edit Proposals -->
         {% for proposal in edit_proposals %}
-            <div>
-                <p>{{ proposal.user.username }} proposed an edit:</p>
-                <p>{{ proposal.content }}</p>
-                {% if current_user == story.author and not proposal.author_approval %}
-                    <form action="{{ url_for('handle_edit_proposal', proposal_id=proposal.id, action='accept') }}" method="post">
-                        {{ form.hidden_tag() }}
-                        <input class="button" type="submit" value="Accept">
-                    </form>
-                    <form action="{{ url_for('handle_edit_proposal', proposal_id=proposal.id, action='decline') }}" method="post">
-                        {{ form.hidden_tag() }}
-                        <input class="button" type="submit" value="Decline">
-                    </form>
-                {% endif %}
-            </div>
+        <div>
+            <p>{{ proposal.user.username }} proposed an edit:</p>
+            <p>{{ proposal.content }}</p>
+            {% if current_user == story.author and not proposal.author_approval %}
+            <form action="{{ url_for('handle_edit_proposal', proposal_id=proposal.id, action='accept') }}"
+                method="post">
+                {{ form.hidden_tag() }}
+                <input class="button" type="submit" value="Accept">
+            </form>
+            <form action="{{ url_for('handle_edit_proposal', proposal_id=proposal.id, action='decline') }}"
+                method="post">
+                {{ form.hidden_tag() }}
+                <input class="button" type="submit" value="Decline">
+            </form>
+            {% endif %}
+        </div>
         {% endfor %}
 
         {% if current_user == story.author %}
@@ -184,24 +247,116 @@ input {
             {{ form.hidden_tag() }}
             <input class="button" type="submit" value="Delete Story">
         </form>
-    {% endif %}
+        {% endif %}
 
 
     </main>
+    <script>
+        document.getElementById('toggleCommentForm').addEventListener('click', function () {
+            var commentForm = document.getElementById('commentForm');
+            commentForm.style.display = (commentForm.style.display === 'none') ? 'block' : 'none';
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function populateChapterDropdown() {
+            var storyContent = document.getElementById('contentExcerpt').innerText;
+            var chapterRegex = /Chapter (\d+) ([^\n\r]+)(?=(?:Chapter \d+ |[\s\S]*?(?=$)))/g;
+            var matches = storyContent.matchAll(chapterRegex);
+            var chapterSelect = document.getElementById('chapterSelect');
+
+            chapterSelect.innerHTML = '';
+
+            for (var match of matches) {
+                var chapterNumber = match[1];
+                var chapterTitle = match[2];
+
+                // Assign an id to each chapter based on chapter number
+                var chapterId = 'chapter_' + chapterNumber;
+
+                // Create a link element for the chapter
+                var link = document.createElement('a');
+                link.href = '#' + chapterId;
+                link.innerHTML = 'Chapter ' + chapterNumber + ': ' + chapterTitle;
+                link.style.marginTop = '10px';
+
+                // Create an option element for the select dropdown
+                var option = document.createElement('option');
+                option.value = chapterNumber;
+                option.appendChild(document.createTextNode(chapterTitle));
+                chapterSelect.add(option);
+
+                // Assign the id to the corresponding chapter container
+                var chapterContainer = document.getElementById('contentExcerpt');
+                var chapterContent = chapterContainer.innerHTML;
+                var chapterRegexId = new RegExp('Chapter ' + chapterNumber);
+                chapterContent = chapterContent.replace(chapterRegexId, '<div id="' + chapterId + '">Chapter ' + chapterNumber);
+                chapterContainer.innerHTML = chapterContent;
+
+                // Append the link to the chapter container
+                document.getElementById(chapterId).insertAdjacentElement('beforebegin', link);
+            }
+
+            if (chapterSelect.options.length === 0) {
+                var option = document.createElement('option');
+                option.text = 'No Chapters';
+                chapterSelect.add(option);
+            }
+        }
+
+        function navigateToChapter() {
+            var selectedChapterNumber = document.getElementById('chapterSelect').value;
+            var chapterId = 'chapter_' + selectedChapterNumber;
+
+            // Scroll to the selected chapterContainer
+            document.getElementById(chapterId).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.onload = function () {
+            populateChapterDropdown();
+        };
+    </script>
+
+    <script>
+        var versions = [
+            // Replace this array with your actual versions data
+            // Each item should have a 'date' and 'content' property
+            {% for version in versions %}
+        { date: "{{ version.date }}", content: `{{ version.content|safe }}` },
+        {% endfor %}
+    ];
+
+        function getVersionContent(versionDate) {
+            for (var i = 0; i < versions.length; i++) {
+                if (versions[i].date === versionDate) {
+                    return versions[i].content;
+                }
+            }
+            return "No content available for the selected version date.";
+        }
+
+        function showVersionsPopup() {
+            var versionsPopup = document.getElementById('versionsPopup');
+            versionsPopup.style.display = 'block';
+        }
+
+        function closeVersionsPopup() {
+            var versionsPopup = document.getElementById('versionsPopup');
+            versionsPopup.style.display = 'none';
+        }
+
+        function displaySelectedVersion() {
+            var selectedVersionDate = document.getElementById('versionSelect').value;
+            var selectedVersionContent = getVersionContent(selectedVersionDate);
+            var selectedVersionContentDiv = document.getElementById('selectedVersionContent');
+            selectedVersionContentDiv.innerHTML = selectedVersionContent;
+        }
+    </script>
+
+
+
 </body>
-
-<script>
-    // JavaScript to toggle the comment form visibility
-    document.getElementById('toggleCommentForm').addEventListener('click', function () {
-        var commentForm = document.getElementById('commentForm');
-        commentForm.style.display = (commentForm.style.display === 'none') ? 'block' : 'none';
-    });
-</script>
-
-<script>
-    function goBack() {
-        window.history.back();
-    }
-</script>
 
 </html>

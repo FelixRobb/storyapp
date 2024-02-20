@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: b2097a98dc4b
+Revision ID: 87596a984a70
 Revises: 
-Create Date: 2024-02-01 15:58:45.561021
+Create Date: 2024-02-15 16:51:09.042264
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b2097a98dc4b'
+revision = '87596a984a70'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,7 +27,10 @@ def upgrade():
     sa.Column('theme', sa.String(length=20), nullable=True),
     sa.Column('language', sa.String(length=10), nullable=True),
     sa.Column('bio', sa.String(length=255), nullable=True),
+    sa.Column('profile_pic', sa.String(length=255), nullable=True),
     sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('reset_token', sa.String(length=100), nullable=True),
+    sa.Column('is_author', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
@@ -50,10 +53,10 @@ def upgrade():
     )
     op.create_table('story',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=100), nullable=False),
-    sa.Column('synopsis', sa.String(length=200), nullable=True),
+    sa.Column('title', sa.String(length=255), nullable=False),
+    sa.Column('synopsis', sa.String(length=1000), nullable=False),
     sa.Column('content', sa.Text(), nullable=False),
-    sa.Column('tags', sa.String(length=100), nullable=True),
+    sa.Column('tags', sa.String(length=255), nullable=True),
     sa.Column('author_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['author_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -81,9 +84,9 @@ def upgrade():
     )
     op.create_table('version',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.String(length=20), nullable=True),
+    sa.Column('date', sa.DateTime(), nullable=False),
     sa.Column('content', sa.Text(), nullable=False),
-    sa.Column('story_id', sa.Integer(), nullable=False),
+    sa.Column('story_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['story_id'], ['story.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

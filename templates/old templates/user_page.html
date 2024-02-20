@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Page</title>
+    <title>My Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <style>
         body {
             background-color: #1f1f1f;
@@ -19,95 +21,338 @@
         }
 
         h2 {
-            color: #ff0000;
+            color: #b9b9b9;
+        }
+				
+				   a {
+            color: #fff;
         }
 
-        ul {
+        .profile-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 20px;
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-username {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .profile-bio {
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        .edit-profile-button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .edit-profile-button:hover {
+            background-color: #45a049;
+        }
+
+        .story {
+            gap: 6px;
+            flex-wrap: wrap;
             list-style-type: none;
             padding: 0;
+            margin-bottom: 20px;
         }
 
         li {
-            margin-bottom: 10px;
+            display: flex;
         }
 
-        a {
-            text-align: center;
-            color: #00ff00;
-            text-decoration: none;
-        }
-
-        a {
+        .story-box {
             display: block;
-            text-align: center;
-            color: #00ff00;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #333;
             text-decoration: none;
-            padding: 10px;
-            background-color: #4CAF50;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            
         }
- 
-        #searchForm {
-            display: none;
+
+        .author {
+            color: #00ff00;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        h3 {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .synopsis {
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        .content-preview {
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .tags {
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #ffffff;
+        }
+
+        .linkli {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            flex-basis: 100%;
+            justify-content: space-between;
+            align-items: center;
+            border: #5c5c5c 3px solid;
+            border-radius: 30px;
+            padding: 5px;
+            padding: 8px;
+        }
+
+        .links {
+            flex-basis: calc(200% - 10px);
+            box-sizing: border-box;
+            text-align: center;
+            overflow-wrap: break-word;
+            color: #c2c2c2;
+            background-color: #2c2c2c;
+            border-radius: 38px;
+            font-size: 16px;
+            text-decoration: none;
+            padding: 12px;
+            margin: 5px;
+            box-shadow: 0 0 4px #aba4a4;
+        }
+
+        @media only screen and (min-width: 698px) {
+
+            .create {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                background-color: #2c2c2c;
+                border-radius: 22px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
+
+            #createbot {
+                display: none;
+            }
+
+        }
+
+        @media only screen and (max-width: 700px) {
+
+            .create {
+                box-sizing: border-box;
+                content: "";
+                display:none;
+                margin: 0px;
+                padding: 0px;
+                box-shadow: 0px;
+                width: 0px;
+            }
+
+            #createbot {
+                position: fixed;
+                text-align: center;
+                color: #c2c2c2;
+                background-color: #4c4c4c;
+                border-radius: 22px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                bottom: 30px;
+                right: 30px;
+                box-shadow: 0 0 7px #00ff00;
+            }
+
+            .linkli {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                border-radius: 30px;
+                padding: 8px;
+                
+            }
+
+            .links {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                border-radius: 22px;
+                font-size: clamp(16px, 3vw, 20px);
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
+
+
+        }
+
+        @media only screen and (max-width: 600px) {
+        				.linkli {
+        								display:none;
+        				}
+
+            .plink {
+            				width: 100%;
+            				height: 50px;
+            				position: fixed;
+            				bottom: 0px;
+            				left: 0px;
+            				display: flex;
+            				flex-direction: row;
+            				border-top: 2px solid  #b9b9b9;
+                justify-content: space-between;
+            				background-color: #000;
+            }
+
+            .plinks {
+            				margin-left: 8px;
+            			margin-right: 8px;
+            				padding: 10px;
+            }
+        				
+        				.icon {
+        								height: 30px;
+        								width: 30px;
+        							
+        				}
+
+            .search-form {
+                display: flex;
+                flex-wrap: nowrap;
+                width: 100vw;
+            }
+
+            input {
+                display: inline-flex;
+            }
+
+            .create {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+            }
+        				
+        				#createbot {
+        								display: none;
+        				}
         }
     </style>
 </head>
+
 <body>
-    <main>
-        <h2>User Page - {{ user.username }} <button onclick="toggleSearch()">Search</button></h2>
-        <div id="searchForm" class="collapse">
-            {% include 'search.html' %}
+    <header style="max-width: 800px;
+    margin: 20px auto;">
+        <div class="headt">
+            <h2>STORIA</h2>
         </div>
-        <ul>
-            <li><a href="{{ url_for('edit_profile') }}">Edit Profile</a></li>
-            <li><a href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
-            <li><a href="{{ url_for('notifications') }}" class="notification-button">Notifications</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-        </ul>
-    
-        {% if not is_own_page %}
-            <!-- Display follow button or any other user-specific actions -->
-            <form method="post" action="{{ url_for('follow_user', user_id=user.id) }}">
-                <button type="submit">Follow</button>
-            </form>
-        {% endif %}
-       
-        <p>User Stories:</p>
-        <ul>
+        <div>
+
+            <ul class="linkli">
+                <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
+                <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
+                <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
+                <li><a class="links" href="{{ url_for('user_settings') }}">settings</a></li>
+                <li><a class="links" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+
+        </div>
+    </header>
+    <main>
+        <div class="profile-info">
+            <div class="profile-image">
+                {% if user.profile_pic %}
+                <img src="{{ url_for('static', filename='images/profpics/' + user.profile_pic) }}"
+                    alt="{{ user.username }}'s Profile Picture">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/profpics/default_profile_pic.png') }}"
+                    alt="{{ user.username }}'s Default Profile Picture">
+                {% endif %}
+            </div>
+            <div class="profile-details">
+                <div class="profile-username">{{ current_user.username }}</div>
+                <p class="profile-bio">{{ current_user.bio }}</p>
+                <a class="edit-profile-button" href="{{ url_for('edit_profile', user_id=user.id) }}">Edit Profile</a>
+            </div>
+        </div>
+
+    				<div class="plink">
+    								<div class="plinks" ><a href="{{ url_for('index') }}"><img class="icon" src="{{ url_for('static', filename='icons/home.png') }}" alt="Example Icon"></a></div>
+    								<div class="plinks" ><a href="{{ url_for('create_story', story_id=-1) }}"><img class="icon" src="{{ url_for('static', filename='icons/add.png') }}" alt="Example Icon"></a></div>
+    								<div class="plinks" ><a href="{{ url_for('user_relations') }}"><img class="icon" src="{{ url_for('static', filename='icons/users.png') }}" alt="Example Icon" ></a></div>
+    								<div class="plinks" ><img class="icon" src="{{ url_for('static', filename='icons/onuser.png') }}" alt="Example Icon" ></div>
+    				</div>
+				
+        <h2>My Stories</h2>
+
+        <ul class="story">
             {% for story in user_stories %}
-                <li><a href="{{ url_for('view_story', story_id=story.id) }}">{{ story.title }}</a></li>
+            <a id="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
+                <li class="story-box">
+                    <div class="author">{{ story.author.username }}</div>
+                    <h3>{{ story.title }}</h3>
+                    <p class="synopsis">{{ story.synopsis }}</p>
+                    <div class="content-preview">{{ story.content[:10] }}...</div>
+                    <p class="tags">Tags: {{ story.tags }}</p>
+                </li>
+            </a>
             {% endfor %}
         </ul>
-             
-        <p>Following:</p>
-        <ul>
-            {% for followed_user in current_user.followed %}
-                <li><a href="{{ url_for('user_page', user_id=followed_user.id) }}">{{ followed_user.username }}</a></li>
-            {% endfor %}
-        </ul>
-
-        <p>Followers:</p>
-        <ul>
-            {% for follower in followers %}
-                <li>{{ follower.username }}</li>
-            {% endfor %}
-        </ul>
-
-        <p>Suggested Users:</p>
-        <ul>
-            {% for suggested_user in suggested_users %}
-                <li><a href="{{ url_for('user_page', user_id=suggested_user.id) }}">{{ suggested_user.username }}</a></li>
-            {% endfor %}
-        </ul>
+        <li><a id="createbot" href="{{ url_for('create_story', story_id=-1) }}">Create
+            Story</a></li>
     </main>
 </body>
-<script>
-    function toggleSearch() {
-        var searchForm = document.getElementById('searchForm');
-        searchForm.style.display = (searchForm.style.display === '') ? 'block' : '';
-    }
-</script>
 
 </html>

@@ -82,7 +82,7 @@ class User(db.Model, UserMixin):
     followers = db.relationship('Follow', foreign_keys='Follow.followed_id', backref='followed', lazy='dynamic')
     followed = db.relationship('Follow', foreign_keys='Follow.follower_id', backref='follower', lazy='dynamic')
     notifications = db.relationship('Notification', backref='user', lazy=True)
-    profile_pic = db.Column(db.String(255), default='default_profile_pic.png')
+    profile_pic = db.Column(db.String(255), default='default_profile_pic.jpg')
     email = db.Column(db.String(120), unique=True, nullable=False)
     reset_token = db.Column(db.String(100), nullable=True)
     is_author = db.Column(db.Boolean, default=False)
@@ -452,7 +452,7 @@ def create_story():
 
         # Create an initial version for the story
         initial_version = Version(
-            date=datetime.utcnow(),
+            date=datetime.now(timezone.utc).strftime('%Y-%m-%d'),
             content=content.replace('\n', '<br>'),  # Convert newline characters to <br>
             story=new_story
         )
@@ -695,11 +695,11 @@ def edit_profile(user_id):
                     profile_pic.save(original_path)
 
                     # Convert the image to PNG
-                    png_path = os.path.join(app.config['IMAGE_UPLOAD_FOLDER'], username_filename)
+                    png_path = os.path.join(app.config['UPLOAD_FOLDER'], username_filename)
                     convert_to_png(original_path, png_path)
 
                     # Resize the image for the profile picture
-                    profile_pic_path = os.path.join(app.config['IMAGE_UPLOAD_FOLDER'], username_filename)
+                    profile_pic_path = os.path.join(app.config['UPLOAD_FOLDER'], username_filename)
                     resize_image(png_path, profile_pic_path, size=(200, 200))
 
                     # Update the user profile pic path in the database with the username and PNG extension
@@ -725,7 +725,7 @@ def edit_profile(user_id):
 # User relations
 @app.route('/user/relations', methods=['GET'])
 @login_required
-def user_relations(user_id):
+def user_relations():
     user = current_user
     followed_users = user.followers.all()
     followers = user.followed.all()
@@ -901,4 +901,4 @@ def see_email():
 
 # Run app
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Story</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <style>
         body {
             background-color: #1f1f1f;
@@ -13,16 +15,53 @@
             padding: 20px;
         }
 
-        .editor {
-            background-color: #2b2b2b;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        main {
+            max-width: 800px;
+            margin: 20px auto;
         }
 
-        textarea {
-            width: 95%;
-            height: 200px;
+        p {
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .story-box {
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+
+        .content {
+            margin-bottom: 20px;
+        }
+
+        .content-excerpt {
+            border: 2px solid #494949;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        input {
+            width: calc(100% - 22px);
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #555;
@@ -30,24 +69,52 @@
             background-color: #333;
             color: #fff;
         }
-
-        button {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+        
     </style>
 </head>
+
 <body>
-    <div class="editor">
-        <h2>Edit Story</h2>
-        <form method="post">
-            <textarea name="edit" required>{{ story.content }}</textarea>
-            <button type="submit">Save Changes</button>
-        </form>
-    </div>
+    <header style="max-width: 800px; margin: 20px auto;">
+        <div class="headt">
+            <h2>STORIA</h2>
+        </div>
+    </header>
+    <main>
+        <button style="margin-bottom: 20px;" class="button" onclick="goBack()">Go Back</button>
+        <div class="story-box">
+            <form method="post" action="{{ url_for('edit_story', story_id=story.id) }}">
+                {{ form.hidden_tag() }}
+
+                <label for="title">Title</label>
+                {{ form.title(class="form-control") }}
+
+                <label for="synopsis">Synopsis</label>
+                {{ form.synopsis(class="form-control") }}
+
+                <label for="content">Content</label>
+                {{ form.content(class="form-control") }}
+
+                <label for="tags">Tags</label>
+                {{ form.tags(class="form-control") }}
+
+                <!-- New Chapter Fields -->
+                <h3>Add Chapter</h3>
+                <label for="chapter_title">Chapter Title</label>
+                {{ form.chapter_title(class="form-control") }}
+
+                <label for="chapter_content">Chapter Content</label>
+                {{ form.chapter_content(class="form-control") }}
+
+                <button type="submit" class="button">Save Changes</button>
+            </form>
+        </div>
+    </main>
 </body>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
 </html>

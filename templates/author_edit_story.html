@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Story</title>
+    <title>Edit Story</title>
     <style>
         body {
             background-color: #1f1f1f;
@@ -17,11 +18,9 @@
             display: block;
             max-width: 800px;
             margin: 20px auto;
-            
-            
         }
 
-        .creator {
+        .editor {
             margin-left: auto;
             margin-right: auto;
             max-width: 600px;
@@ -43,7 +42,6 @@
             color: #fff;
             resize: vertical;
         }
-
 
         button {
             padding: 10px;
@@ -86,25 +84,27 @@
             border-top-right-radius: 8px;
             border-bottom: 2px solid #10ea178f;
             margin-bottom: 40px;
-            font-family:'Times New Roman', Times, serif;
+            font-family: 'Times New Roman', Times, serif;
             font-size: 40px;
             text-align: center;
-            display: flex; /* Add this line */
-            align-items: center; /* Add this line */
+            display: flex;
+            align-items: center;
             justify-content: center;
         }
 
         @keyframes animateBg {
-    0% {
-        background-position-y: 0;
-    }
-    50% {
-        background-position-y: 100%;
-    }
-    100% {
-        background-position-y: 0;
-    }
-}
+            0% {
+                background-position-y: 0;
+            }
+
+            50% {
+                background-position-y: 100%;
+            }
+
+            100% {
+                background-position-y: 0;
+            }
+        }
     </style>
 
 <script>
@@ -135,7 +135,7 @@
 
             // Update the chapter list display
             const chapterListElement = document.getElementById('chapter-list');
-            chapterListElement.innerHTML = '<h3>Chapters</h3><p>To add a Chapter, write: Chapter (chapter number) (chapter name).<br>Example: Chapter 1 Intro</p><ul>';
+            chapterListElement.innerHTML = '<h3>Chapters</h3><ul>';
             chapterList.forEach(chapter => {
                 const chapterItem = document.createElement('li');
                 chapterItem.textContent = `Chapter ${chapter.number}: ${chapter.title}`;
@@ -153,45 +153,45 @@
     });
 </script>
 
+</head>
 
-  </head>
 <body>
-    <header style="max-width: 800px;
-    margin: 20px auto;">
+    <header style="max-width: 800px; margin: 20px auto;">
         <div class="headt">
             <h2>STORIA</h2>
         </div>
-     </header>
-     <main>
+    </header>
+    <main>
         <button onclick="goBack()">Go Back</button>
-    <div class="creator">
-        <h2>Create Story</h2>
-        <form method="POST" action="{{ url_for('create_story') }}">
-             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-           
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title" required>
+        <div class="editor">
+            <h2>Edit Story</h2>
+            <form method="POST" action="{{ url_for('edit_story', story_id=story.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <label for="synopsis">Synopsis:</label>
-            <textarea style="max-height: 30px;" type="text" id="synopsis" name="synopsis" required></textarea>
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="{{ story.title }}" required>
 
-            <div id="chapter-list" class="chapter-list"></div>
+                <label for="synopsis">Synopsis:</label>
+                <textarea style="max-height: 30px;" id="synopsis" name="synopsis" required>{{ story.synopsis }}</textarea>
 
-            <label for="content">Content:</label>
-            <textarea style="min-height: 150px;" name="content" required></textarea>
+                <div id="chapter-list" class="chapter-list"></div>
 
-            <label for="tags">Tags:</label>
-            <input type="text" id="tags" name="tags">
+                <label for="content">Content:</label>
+                <textarea style="min-height: 150px;" name="content" required>{{ story.content }}</textarea>
 
-            <button type="submit">Create Story</button>
-            
-         </form>
-    </div>
-</main>
+                <label for="tags">Tags:</label>
+                <input type="text" id="tags" name="tags" value="{{ story.tags }}">
+
+                <button type="submit">Save Changes</button>
+
+            </form>
+        </div>
+    </main>
 </body>
 <script>
     function goBack() {
         window.history.back();
     }
 </script>
+
 </html>

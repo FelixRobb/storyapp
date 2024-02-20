@@ -25,8 +25,6 @@
         }
 
         .story {
-            gap: 6px;
-            flex-wrap: wrap;
             list-style-type: none;
             padding: 0;
             margin-bottom: 20px;
@@ -97,31 +95,249 @@
         }
 
 
-
         .search-form {
             height: 35px;
             background-color: #2b2b2b;
-            border-radius: 30px;
+            border-radius: 22px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             align-items: center;
             justify-content: center;
             font-size: 16px;
             text-align: center;
             padding: 5px;
+            box-shadow: 0 0 4px #aba4a4;
         }
 
 
         input {
+            width: calc(100% /1.8);
             height: 25px;
             background: none;
             border: 1px;
             border-radius: 40px;
             color: #fff;
+            padding: 5px;
         }
 
 
         a {
             text-decoration: none;
+        }
+
+        a {
+            color: #fff;
+        }
+
+        .linkli {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            flex-basis: 100%;
+            justify-content: space-between;
+            align-items: center;
+            border: #5c5c5c 3px solid;
+            border-radius: 30px;
+            padding: 5px;
+            padding: 8px;
+        }
+
+        .links {
+            flex-basis: calc(200% - 10px);
+            box-sizing: border-box;
+            text-align: center;
+            overflow-wrap: break-word;
+            color: #c2c2c2;
+            background-color: #2c2c2c;
+            border-radius: 38px;
+            font-size: 16px;
+            text-decoration: none;
+            padding: 12px;
+            margin: 5px;
+            box-shadow: 0 0 4px #aba4a4;
+        }
+
+        .content-preview {
+            width: 100%;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        @media only screen and (min-width: 800px) {
+
+            .create {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                background-color: #2c2c2c;
+                border-radius: 22px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
+
+            #createbot {
+                display: none;
+            }
+
+            .search-form2 {
+                display: none;
+            }
+
+            .plink {
+                display: none;
+            }
+
+            .pbar {
+                display: none;
+            }
+
+        }
+
+        @media only screen and (max-width: 800px) {
+
+            .create {
+                display: none;
+            }
+
+            #createbot {
+                position: fixed;
+                text-align: center;
+                color: #c2c2c2;
+                background-color: #4c4c4c;
+                border-radius: 22px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                bottom: 30px;
+                right: 30px;
+                box-shadow: 0 0 7px #00ff00;
+            }
+
+            .linkli {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+                border: #5c5c5c 3px solid;
+                border-radius: 30px;
+                padding: 5px;
+                padding: 8px;
+                gap: 5px;
+            }
+
+            .links {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                border-radius: 22px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
+
+            .plink {
+                display: none;
+            }
+
+            .pbar {
+                display: none;
+            }
+
+        }
+
+        .headt {
+            display: flex;
+            height: 80px;
+            text-align: center;
+            font-size: 18px;
+            border-top: 1px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 2px solid #56f35c8f;
+            margin-bottom: 40px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 40px;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        @media only screen and (max-width: 600px) {
+            .linkli {
+                display: none;
+            }
+
+            .plink {
+                width: 100%;
+                height: 60px;
+                position: fixed;
+                bottom: 0px;
+                left: 0px;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                background-color: #000;
+                border-top-left-radius: 15px;
+                border-top-right-radius: 15px;
+                align-items: center;
+            }
+
+            .plinks {
+                margin-left: 8px;
+                margin-right: 8px;
+                padding: 10px;
+            }
+
+            .icon {
+                height: 30px;
+                width: 30px;
+
+            }
+
+            input {
+                display: inline-flex;
+            }
+
+            .create {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            #createbot {
+                display: none;
+            }
+
+            .pbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .search-form2 {
+                height: 35px;
+                background-color: #2b2b2b;
+                border-radius: 22px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                text-align: center;
+                padding: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
+
         }
     </style>
 </head>
@@ -134,9 +350,12 @@
         </div>
         <div>
             <ul class="linkli">
-                <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My Page</a></li>
-                <li><a class="links" href="{{ url_for('user_relations') }}">User Relations</a></li>
-                <li><a class="links" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
+                <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My
+                        Page</a></li>
+                <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create
+                        Story</a></li>
+                <li><a class="links" href="{{ url_for('user_relations') }}">User
+                        Relations</a></li>
                 <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
                 <li>
                     <div class="search-form">
@@ -152,9 +371,31 @@
     </header>
     <main>
 
+        <div class="plink">
+            <div class="plinks"><img class="icon" src="{{ url_for('static', filename='icons/onhome.png') }}"
+                    alt="Example Icon"></a></div>
+            <div class="plinks"><a href="{{ url_for('create_story', story_id=-1) }}"><img class="icon"
+                        src="{{ url_for('static', filename='icons/add.png') }}" alt="Example Icon"></a></div>
+            <div class="plinks"><a href="{{ url_for('user_relations') }}"><img class="icon"
+                        src="{{ url_for('static', filename='icons/users.png') }}" alt="Example Icon"></a></div>
+            <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
+                        src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
+        </div>
 
-        <h2>Feed</h2>
 
+        <div class="pbar">
+            <h2>Feed</h2>
+            <div class="search-form2" style="margin-left: 10px; margin-right: 10px;">
+                <form method="post" action="{{ url_for('search_results', query=search_query) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="text" id="search_query" name="search_query" placeholder="Search..." required>
+                    <button style="display: inline; border-radius: 50px;" type="submit">search</button>
+                </form>
+            </div>
+            <a href="{{ url_for('notifications') }}"><img class="icon"
+                    src="{{ url_for('static', filename='icons/bell.png') }}" alt="Example Icon"></a>
+
+        </div>
         <ul class="story">
             {% for story in stories %}
             <a id="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
@@ -162,13 +403,14 @@
                     <div class="author">{{ story.author.username }}</div>
                     <h3>{{ story.title }}</h3>
                     <p class="synopsis">{{ story.synopsis }}</p>
-                    <div class="content-preview">{{ story.content[:10] }}...</div>
+                    <div class="content-preview" style="overflow: hidden;">{{ story.content[:100]|safe }}...</div>
                     <p class="tags">Tags: {{ story.tags }}</p>
                 </li>
             </a>
             {% endfor %}
         </ul>
-
+        <li><a id="createbot" href="{{ url_for('create_story', story_id=-1) }}">Create
+                Story</a></li>
     </main>
 </body>
 

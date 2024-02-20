@@ -153,6 +153,16 @@
         a:hover {
             color: #fff;
         }
+
+        .relat {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .relul {
+            padding: 10px;
+            flex: 1;
+        }
     </style>
 </head>
 
@@ -162,30 +172,33 @@
     </header>
     <main>
         <button><a href="{{ url_for('index') }}">Back to Feed</a></button>
-        <h2>User Relations</h2>
-
-        <h3>Following</h3>
-        <ul>
-            {% for followed_user in current_user.followed %}
-            <li><a class="linksfll" href="{{ url_for('user_page', user_id=followed_user.id) }}">{{
-                    followed_user.username }}</a></li>
-            {% endfor %}
-        </ul>
-
-        <h3>Followers</h3>
-        <ul>
-            {% for follower in followers %}
-            <li>{{ follower.username }}</li>
-            {% endfor %}
-        </ul>
-
-        <h3>Suggested Users</h3>
-        <ul>
-            {% for suggested_user in suggested_users %}
-            <li><a class="links" href="{{ url_for('user_page', user_id=suggested_user.id) }}">{{ suggested_user.username
-                    }}</a></li>
-            {% endfor %}
-        </ul>
+        <h2>User Relations for {{ current_user.username }}</h2>
+        <div class="relat">
+            <div class="relul">
+                <h3>Following</h3>
+                <ul>
+                    {% for followed_user in followed_users %}
+                    <li><a href="{{ url_for('user_page', user_id=following.id) }}">{{ followed_user.username }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="relul">
+                <h3>Followers</h3>
+                <ul>
+                    {% for follower in followers %}
+                    <li><a href="{{ url_for('user_page', user_id=follow.follower.id) }}">{{ follow.follower.username }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="relul">
+                <h3>Suggested Users</h3>
+                <ul>
+                    {% for suggested_user in suggested_users %}
+                    <li><a href="{{ url_for('user_page', user_id=suggested_user.id) }}">{{ suggested_user.username }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </main>
 </body>
 
