@@ -195,6 +195,25 @@
                 display: none;
             }
 
+            .linksn {
+                display: none;
+            }
+
+            .linksp {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                background-color: #2c2c2c;
+                border-radius: 38px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
+
         }
 
         @media only screen and (max-width: 800px) {
@@ -237,7 +256,8 @@
                 text-align: center;
                 overflow-wrap: break-word;
                 color: #c2c2c2;
-                border-radius: 22px;
+                background-color: #2c2c2c;
+                border-radius: 38px;
                 font-size: 16px;
                 text-decoration: none;
                 padding: 12px;
@@ -251,6 +271,25 @@
 
             .pbar {
                 display: none;
+            }
+
+            .linksn {
+                display: none;
+            }
+
+            .linksp {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                background-color: #2c2c2c;
+                border-radius: 38px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
             }
 
         }
@@ -272,6 +311,23 @@
             justify-content: center;
         }
 
+
+        @media only screen and (max-width: 661px) {
+            .linksp {
+                display: none;
+            }
+
+            .linksn {
+                display: inline;
+                height: 30px;
+                width: 30px;
+            }
+
+            .icon {
+                height: 30px;
+                width: 30px;
+            }
+        }
 
         @media only screen and (max-width: 600px) {
             .linkli {
@@ -296,7 +352,6 @@
             .plinks {
                 margin-left: 8px;
                 margin-right: 8px;
-                padding: 10px;
             }
 
             .icon {
@@ -356,7 +411,7 @@
                         Story</a></li>
                 <li><a class="links" href="{{ url_for('user_relations') }}">User
                         Relations</a></li>
-                <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
+                <li><a class="linksp" href="{{ url_for('notifications') }}">Notifications</a></li>
                 <li>
                     <div class="search-form">
                         <form method="post" action="{{ url_for('search_results', query=search_query) }}">
@@ -366,6 +421,9 @@
                         </form>
                     </div>
                 </li>
+                <li><a class="linksn" href="{{ url_for('notifications') }}"><img class="icon"
+                            src="{{ url_for('static', filename='icons/bell.png') }}" alt="Example Icon"></a></li>
+
             </ul>
         </div>
     </header>
