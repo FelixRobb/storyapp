@@ -1,0 +1,12 @@
+alembic==1.13.0
+Flask==3.0.2
+Flask_Argon2==0.3.0.0
+Flask_Login==0.6.3
+Flask_Mail==0.9.1
+Flask_Migrate==4.0.5
+flask_sqlalchemy==3.1.1
+flask_wtf==1.2.1
+Pillow==10.2.0
+SQLAlchemy==2.0.23
+Werkzeug==3.0.1
+WTForms==3.1.2
