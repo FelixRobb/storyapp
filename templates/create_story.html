@@ -190,9 +190,9 @@
             }
 
             .icon {
-        height: 30px;
-        width: 30px;
-    }
+                height: 30px;
+                width: 30px;
+            }
         }
     </style>
 
@@ -255,7 +255,7 @@
             <ul class="linkli">
                 <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
                 <li><a class="links" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
-                <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
+                <li><a class="links" href="{{ url_for('user_relations') }}">User Relations</a></li>
                 <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My Page</a></li>
             </ul>
         </div>
@@ -285,12 +285,14 @@
                 <input type="text" id="title" name="title" placeholder="The title of your story" required>
 
                 <label for="synopsis">Synopsis:</label>
-                <textarea style="max-height: 30px;" type="text" id="synopsis" name="synopsis" placeholder="Idealy 200 characters" required></textarea>
+                <textarea style="max-height: 30px;" type="text" id="synopsis" name="synopsis"
+                    placeholder="Idealy 200 characters" required></textarea>
 
                 <div id="chapter-list" class="chapter-list"></div>
 
                 <label for="content">Content:</label>
-                <textarea style="min-height: 150px;" name="content" placeholder="The content of the story itself" required></textarea>
+                <textarea style="min-height: 150px;" name="content" placeholder="The content of the story itself"
+                    required></textarea>
 
                 <label for="tags">Tags:</label>
                 <input type="text" id="tags" name="tags">
