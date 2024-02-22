@@ -10,175 +10,331 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <style>
         body {
-            background-color: #1f1f1f;
-            color: #ffffff;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
+    background-color: #1f1f1f;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
 
-        h2 {
-            color: #b9b9b9;
-        }
+h2 {
+    color: #b9b9b9;
+}
 
-        main {
-            max-width: 800px;
-            margin: 20px auto;
-        }
+main {
+    max-width: 800px;
+    margin: 20px auto;
+}
 
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
+ul {
+    list-style-type: none;
+    padding: 0;
+}
 
-        li {
-            margin-bottom: 10px;
-        }
+li {
+    list-style-type: none;
+    display: flex;
+}
 
-        .links {
-            display: block;
-            text-align: center;
-            color: #00ff00;
-            text-decoration: none;
-            padding: 10px;
-            background-color: #4CAF50;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
+.username {
+    align-self: center;
+}
 
-        .linksfll {
-            display: block;
-            text-align: center;
-            color: #00ff00;
-            text-decoration: none;
-            padding: 10px;
-            background-color: #4CAF50;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            height: 20px;
-        }
+.story-box {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #333;
+}
 
-        .story-box {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: #333;
-        }
+.author {
+    color: #00ff00;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
 
-        .author {
-            color: #00ff00;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
+.iconi {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 50px;
+    background-color: #333;
+    overflow: hidden;
+}
 
-        h3 {
-            color: #fff;
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
+h3 {
+    color: #fff;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
 
-        .synopsis {
-            color: #aaa;
-            margin-bottom: 12px;
-        }
+button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
 
-        .content-preview {
-            color: #fff;
-            margin-bottom: 12px;
-        }
+button:hover {
+    background-color: #45a049;
+}
 
-        .tags {
-            color: #aaa;
-            margin-bottom: 12px;
-        }
+a {
+    color: #fff;
+}
 
-        button {
-            background-color: #4CAF50;
-            color: #fff;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+a:hover {
+    color: #fff;
+}
 
-        button:hover {
-            background-color: #45a049;
-        }
+.relat {
+    max-width: 800px;
+    flex-direction: row;
+    justify-content: space-between;
+}
 
-        #searchForm {
-            display: none;
-        }
+.relul {
+    width: calc(30% - 20px);
+    padding: 10px;
+}
 
-        .story-link {
-            display: none;
-        }
+.lif {
+    width: calc(100% - 20px);
+    display: flex;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+    background-color: #424242;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 2px solid #767676;
+    box-shadow: 0 4px 8px rgba(226, 226, 226, 0.1);
+}
 
-        .story-box a.story-link {
-            color: #ff9900;
-            text-decoration: none;
-            border: none;
-            background-color: transparent;
-            padding: 0;
-            margin: 0;
-        }
+.puser {
+    display: none;
+}
 
-        .search-form {
-            display: inline;
-            background-color: #2b2b2b;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            text-align: center;
-        }
+.cuser {
+    display: block;
+}
 
-        input {
-            height: 15px;
-            width: 50%;
-            padding: 8px;
-            border: 1px solid #555;
-            border-radius: 4px;
-            background-color: #333;
-            color: #fff;
-            margin: 12px;
-            display: inline-block;
-        }
+.linkli {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-basis: 100%;
+    justify-content: space-between;
+    align-items: center;
+    border: #5c5c5c 3px solid;
+    border-radius: 30px;
+    padding: 8px;
+}
 
-        a {
-            color: #fff;
-        }
+.links {
+    flex-basis: calc(200% - 10px);
+    box-sizing: border-box;
+    text-align: center;
+    overflow-wrap: break-word;
+    color: #c2c2c2;
+    background-color: #2c2c2c;
+    border-radius: 38px;
+    font-size: 16px;
+    text-decoration: none;
+    padding: 12px;
+    margin: 5px;
+    box-shadow: 0 0 4px #aba4a4;
+}
 
-        a:hover {
-            color: #fff;
-        }
+@media only screen and (max-width: 600px) {
+    .cuser {
+        display: none;
+    }
 
-        .relat {
-            display: flex;
-            flex-direction: row;
-        }
+    .puser {
+        display: block;
+    }
+}
 
-        .relul {
-            padding: 10px;
-            flex: 1;
-        }
-    </style>
+@media only screen and (min-width: 698px) {
+    .create {
+        flex-basis: calc(200% - 10px);
+        box-sizing: border-box;
+        text-align: center;
+        overflow-wrap: break-word;
+        color: #c2c2c2;
+        background-color: #2c2c2c;
+        border-radius: 22px;
+        font-size: 16px;
+        text-decoration: none;
+        padding: 12px;
+        margin: 5px;
+        box-shadow: 0 0 4px #aba4a4;
+    }
+
+    #createbot {
+        display: none;
+    }
+
+    .plink {
+        display: none;
+    }
+
+    .pbar {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    .create {
+        box-sizing: border-box;
+        display: none;
+        margin: 12px;
+        padding: 5px;
+        box-shadow: 0px;
+    }
+
+    #createbot {
+        position: fixed;
+        text-align: center;
+        color: #c2c2c2;
+        background-color: #4c4c4c;
+        border-radius: 22px;
+        font-size: 16px;
+        text-decoration: none;
+        padding: 12px;
+        margin: 5px;
+        bottom: 30px;
+        right: 30px;
+        box-shadow: 0 0 7px #00ff00;
+    }
+
+    .linkli {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        border-radius: 30px;
+        padding: 8px;
+    }
+
+    .links {
+        flex-basis: calc(200% - 10px);
+        box-sizing: border-box;
+        text-align: center;
+        overflow-wrap: break-word;
+        color: #c2c2c2;
+        border-radius: 22px;
+        font-size: clamp(16px, 3vw, 20px);
+        text-decoration: none;
+        padding: 12px;
+        margin: 5px;
+        box-shadow: 0 0 4px #aba4a4;
+    }
+
+    .plink {
+        display: none;
+    }
+
+    .pbar {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .linkli {
+        display: none;
+    }
+
+    .plink {
+        width: 100%;
+        height: 60px;
+        position: fixed;
+        bottom: 0px;
+        left: 0px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        background-color: #000;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        align-items: center;
+    }
+
+    .plinks {
+        margin-left: 8px;
+        margin-right: 8px;
+        padding: 10px;
+    }
+
+    .icon {
+        height: 30px;
+        width: 30px;
+    }
+
+    .search-form {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100vw;
+    }
+
+    input {
+        display: inline-flex;
+    }
+
+    #createbot {
+        display: none;
+    }
+}
+</style>
 </head>
 
 <body>
-    <header class="headt">
-        <h2>STORIA</h2>
+    <header style="max-width: 800px;
+    margin: 20px auto;">
+        <div class="headt">
+            <h2>STORIA</h2>
+        </div>
+
+        <div>
+            <ul class="linkli">
+                <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
+                <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
+                <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
+                <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My Page</a></li>
+                </ul>
+        </div>
     </header>
+
     <main>
-        <button><a href="{{ url_for('index') }}">Back to Feed</a></button>
+
+        <div class="plink">
+            <div class="plinks"><a href="{{ url_for('index') }}"><img class="icon"
+                        src="{{ url_for('static', filename='icons/home.png') }}" alt="Example Icon"></a></div>
+            <div class="plinks"><a href="{{ url_for('create_story', story_id=-1) }}"><img class="icon"
+                        src="{{ url_for('static', filename='icons/add.png') }}" alt="Example Icon"></a></div>
+            <div class="plinks"><img class="icon" src="{{ url_for('static', filename='icons/onusers.png') }}" alt="Example Icon"></div>
+                        <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
+                            src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
+        </div>
+
+
         <h2>User Relations for {{ current_user.username }}</h2>
-        <div class="relat">
+        <div class="relat" style="display: flex;">
             <div class="relul">
                 <h3>Following</h3>
                 <ul>
                     {% for followed_user in followed_users %}
-                    <li><a href="{{ url_for('user_page', user_id=following.id) }}">{{ followed_user.username }}</a></li>
+                    <li class="lif">
+                        <img class="iconi"
+                            src="{{ url_for('static', filename='images/profpics/' + followed_user.followed.profile_pic) }}"
+                            alt="Profile Pic">
+                        <a class="username" href="{{ url_for('user_page', user_id=followed_user.followed.id) }}">{{
+                            followed_user.followed.username }}</a>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
@@ -186,19 +342,37 @@
                 <h3>Followers</h3>
                 <ul>
                     {% for follower in followers %}
-                    <li><a href="{{ url_for('user_page', user_id=follow.follower.id) }}">{{ follow.follower.username }}</a></li>
+                    <li class="lif">
+                        <img class="iconi"
+                            src="{{ url_for('static', filename='images/profpics/' + follower.follower.profile_pic) }}"
+                            alt="Profile Pic">
+                        <a class="username" href="{{ url_for('user_page', user_id=follower.follower.id) }}">{{
+                            follower.follower.username
+                            }}</a>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="relul">
-                <h3>Suggested Users</h3>
+                <h3 class="cuser">Suggested Users</h3>
+                <h3 class="puser">Suggested</h3>
                 <ul>
                     {% for suggested_user in suggested_users %}
-                    <li><a href="{{ url_for('user_page', user_id=suggested_user.id) }}">{{ suggested_user.username }}</a></li>
+                    <li class="lif">
+                        <img class="iconi"
+                            src="{{ url_for('static', filename='images/profpics/' + suggested_user.profile_pic) }}"
+                            alt="Profile Pic">
+                        <a class="username" href="{{ url_for('user_page', user_id=suggested_user.id) }}">{{
+                            suggested_user.username
+                            }}</a>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
+
+        <li><a id="createbot" href="{{ url_for('create_story', story_id=-1) }}">Create
+            Story</a></li>
     </main>
 </body>
 

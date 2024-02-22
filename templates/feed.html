@@ -312,7 +312,7 @@
         }
 
 
-        @media only screen and (max-width: 661px) {
+        @media only screen and (max-width: 663px) {
             .linksp {
                 display: none;
             }
@@ -405,6 +405,7 @@
         </div>
         <div>
             <ul class="linkli">
+                
                 <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My
                         Page</a></li>
                 <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create
@@ -460,7 +461,7 @@
                 <li class="story-box">
                     <div class="author">{{ story.author.username }}</div>
                     <h3>{{ story.title }}</h3>
-                    <p class="synopsis">{{ story.synopsis }}</p>
+                    <p class="synopsis">{{ story.synopsis[:200] }}</p>
                     <div class="content-preview" style="overflow: hidden;">{{ story.content[:100]|safe }}...</div>
                     <p class="tags">Tags: {{ story.tags }}</p>
                 </li>

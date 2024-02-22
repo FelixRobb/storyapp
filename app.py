@@ -111,8 +111,6 @@ class User(db.Model, UserMixin):
     def get_user_stories(self):
         return Story.query.filter_by(author=self).all()
 
-    def get_followers(self):
-        return self.followers.all()
 
 # Send emails
 def send_reset_email(email, token):
@@ -647,7 +645,6 @@ def user_page(user_id):
 
     if user:
         user_stories = user.get_user_stories()
-        followers = user.get_followers()
 
         # Check if the current user is viewing their own page or another user's page
         is_own_page = user == current_user
@@ -655,15 +652,11 @@ def user_page(user_id):
         # Check if the current user is following the displayed user
         is_following = current_user.is_following(user)
 
-        # Retrieve a list of users that the current user does not follow but has a connection with
-        suggested_users = User.query.filter(User.id != current_user.id, ~current_user.followers.filter_by(follower_id=User.id).exists()).all()
-
+        
         if is_own_page:
-            return render_template('user_page.html', user=user, user_stories=user_stories, followers=followers,
-                                   suggested_users=suggested_users, is_own_page=is_own_page, is_following=is_following)
+            return render_template('user_page.html', user=user, user_stories=user_stories, is_own_page=is_own_page, is_following=is_following)
         else:
-            return render_template('other_user_page.html', user=user, user_stories=user_stories, followers=followers,
-                                   suggested_users=suggested_users, is_own_page=is_own_page, is_following=is_following)
+            return render_template('other_user_page.html', user=user, user_stories=user_stories, is_own_page=is_own_page, is_following=is_following)
     else:
         return "User not found", 404
 
@@ -727,13 +720,18 @@ def edit_profile(user_id):
 @login_required
 def user_relations():
     user = current_user
-    followed_users = user.followers.all()
-    followers = user.followed.all()
+    
+    # Get the followed users (users being followed by the current user)
+    followed_users = Follow.query.filter_by(follower_id=user.id).join(User, Follow.followed_id == User.id).all()
+
+    # Get the followers (users following the current user)
+    followers = Follow.query.filter_by(followed_id=user.id).join(User, Follow.follower_id == User.id).all()
 
     # Retrieve a list of users that the current user does not follow but has a connection with
-    suggested_users = User.query.filter(User.id != user.id, ~user.followers.filter_by(follower_id=User.id).exists()).all()
+    suggested_users = User.query.filter(User.id != user.id, ~user.followers.filter_by(followed_id=User.id).exists()).all()
 
     return render_template('user_relations.html', user=user, followed_users=followed_users, followers=followers, suggested_users=suggested_users)
+
 
 # Notifications
 @app.route('/notifications')

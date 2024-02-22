@@ -143,7 +143,6 @@
             align-items: center;
             border: #5c5c5c 3px solid;
             border-radius: 30px;
-            padding: 5px;
             padding: 8px;
         }
 
@@ -316,8 +315,8 @@
         <div class="headt">
             <h2>STORIA</h2>
         </div>
+        
         <div>
-
             <ul class="linkli">
                 <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
                 <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
@@ -365,8 +364,8 @@
                 <li class="story-box">
                     <div class="author">{{ story.author.username }}</div>
                     <h3>{{ story.title }}</h3>
-                    <p class="synopsis">{{ story.synopsis }}</p>
-                    <div class="content-preview">{{ story.content[:10] }}...</div>
+                    <p class="synopsis">{{ story.synopsis[:200] }}</p>
+                    <div class="content-preview">{{ story.content[:100] }}...</div>
                     <p class="tags">Tags: {{ story.tags }}</p>
                 </li>
             </a>
