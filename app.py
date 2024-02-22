@@ -111,6 +111,10 @@ class User(db.Model, UserMixin):
     def get_user_stories(self):
         return Story.query.filter_by(author=self).all()
 
+    def has_unread_notifications(self):
+        unread_notifications = Notification.query.filter_by(user_id=self.id, read=False).count()
+        print(f"Unread notifications count for user {self.id}: {unread_notifications}")
+        return unread_notifications > 0
 
 # Send emails
 def send_reset_email(email, token):
@@ -192,6 +196,7 @@ class Notification(db.Model):
     content = db.Column(db.String(200), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    read = db.Column(db.Boolean, default=False)
 
 
 # Flask forms
@@ -386,7 +391,8 @@ def index():
                     .all()
                 )
 
-                return render_template('feed.html', stories=stories)
+                unread_notifications = current_user.has_unread_notifications()
+                return render_template('feed.html', stories=stories, unread_notifications=unread_notifications)
         else:
             # Your existing code for fetching stories without search
             subquery = db.session.query(
@@ -400,9 +406,10 @@ def index():
                 .order_by(subquery.c.max_date.desc())
                 .all()
             )
-            followed_users = current_user.followed
 
-            return render_template('feed.html', stories=stories, followed_users=followed_users)
+            unread_notifications = current_user.has_unread_notifications()
+
+            return render_template('feed.html', stories=stories, unread_notifications=unread_notifications)
     else:
         return redirect(url_for('entry_page'))
 
@@ -526,6 +533,17 @@ def edit_story(story_id):
             db.session.add(edit_proposal)
             db.session.commit()
 
+            # Create a notification for the author
+            notification_content = f"New edit proposal for your story '{story.title}'."
+            notification = Notification(
+                content=notification_content,
+                user=story.author,
+                read=False
+            )
+
+            db.session.add(notification)
+            db.session.commit()
+
             flash('Edit proposal submitted. The author will review and approve it.', 'info')
             return redirect(url_for('view_story', story_id=story_id))
 
@@ -545,7 +563,6 @@ def handle_edit_proposal(proposal_id, action):
         if action == 'accept':
             # Apply the accepted edit to the story
             proposal.story.content = proposal.content
-            proposal.story.tags = proposal.tags
             proposal.status = 'accepted'
             proposal.author_approval = True
             db.session.commit()
@@ -737,10 +754,16 @@ def user_relations():
 @app.route('/notifications')
 @login_required
 def notifications():
-    user_notifications = (
-    Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all())
-    return render_template('notifications.html', notifications=user_notifications)
+    # Mark all notifications as read when the user views the notifications page
+    user_notifications = Notification.query.filter_by(user_id=current_user.id).all()
+    for notification in user_notifications:
+        notification.read = True
 
+    db.session.commit()
+
+    # Fetch and display notifications
+    user_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    return render_template('notifications.html', notifications=user_notifications)
 
 # Settings
 @app.route('/user/settings', methods=['GET'])
