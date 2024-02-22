@@ -58,7 +58,7 @@ li {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    margin-right: 50px;
+    margin-right: 15px;
     background-color: #333;
     overflow: hidden;
 }
@@ -149,7 +149,7 @@ a:hover {
     box-shadow: 0 0 4px #aba4a4;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 651px) {
     .cuser {
         display: none;
     }
@@ -160,24 +160,6 @@ a:hover {
 }
 
 @media only screen and (min-width: 698px) {
-    .create {
-        flex-basis: calc(200% - 10px);
-        box-sizing: border-box;
-        text-align: center;
-        overflow-wrap: break-word;
-        color: #c2c2c2;
-        background-color: #2c2c2c;
-        border-radius: 22px;
-        font-size: 16px;
-        text-decoration: none;
-        padding: 12px;
-        margin: 5px;
-        box-shadow: 0 0 4px #aba4a4;
-    }
-
-    #createbot {
-        display: none;
-    }
 
     .plink {
         display: none;
@@ -189,28 +171,6 @@ a:hover {
 }
 
 @media only screen and (max-width: 700px) {
-    .create {
-        box-sizing: border-box;
-        display: none;
-        margin: 12px;
-        padding: 5px;
-        box-shadow: 0px;
-    }
-
-    #createbot {
-        position: fixed;
-        text-align: center;
-        color: #c2c2c2;
-        background-color: #4c4c4c;
-        border-radius: 22px;
-        font-size: 16px;
-        text-decoration: none;
-        padding: 12px;
-        margin: 5px;
-        bottom: 30px;
-        right: 30px;
-        box-shadow: 0 0 7px #00ff00;
-    }
 
     .linkli {
         display: flex;
@@ -275,19 +235,6 @@ a:hover {
         width: 30px;
     }
 
-    .search-form {
-        display: flex;
-        flex-wrap: nowrap;
-        width: 100vw;
-    }
-
-    input {
-        display: inline-flex;
-    }
-
-    #createbot {
-        display: none;
-    }
 }
 </style>
 </head>
@@ -302,7 +249,7 @@ a:hover {
         <div>
             <ul class="linkli">
                 <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
-                <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
+                <li><a class="links" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
                 <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
                 <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My Page</a></li>
                 </ul>
@@ -370,9 +317,6 @@ a:hover {
                 </ul>
             </div>
         </div>
-
-        <li><a id="createbot" href="{{ url_for('create_story', story_id=-1) }}">Create
-            Story</a></li>
     </main>
 </body>
 
