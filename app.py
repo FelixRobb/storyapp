@@ -725,7 +725,7 @@ def edit_profile(user_id):
 # User relations
 @app.route('/user/relations', methods=['GET'])
 @login_required
-def user_relations(user_id):
+def user_relations():
     user = current_user
     followed_users = user.followers.all()
     followers = user.followed.all()
