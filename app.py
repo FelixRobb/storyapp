@@ -5,6 +5,7 @@ import os
 import re
 import string
 import random
+import hashlib
 from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -23,6 +24,8 @@ from random import SystemRandom
 secrets = SystemRandom()
 
 app = Flask(__name__)
+
+
 app.config['SECRET_KEY'] = "knkdjnkjnjdjdj"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stories.db'
 app.config['IMAGE_UPLOAD_FOLDER'] = 'static/images/profpics'
@@ -48,6 +51,19 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 migrate = Migrate(app, db)
 mail = Mail(app)
+
+# cache control
+@app.after_request
+def add_cache_control(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+def generate_etag(content):
+    hash_object = hashlib.md5(content)
+    etag = hash_object.hexdigest()
+    return etag
 
 # image functions
 def allowed_file(filename):
