@@ -10,233 +10,276 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <style>
         body {
-    background-color: #1f1f1f;
-    color: #ffffff;
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 20px;
-}
+            background-color: #1f1f1f;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
 
-h2 {
-    color: #b9b9b9;
-}
+        h2 {
+            color: #b9b9b9;
+        }
 
-main {
-    max-width: 800px;
-    margin: 20px auto;
-}
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+        }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-}
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
 
-li {
-    list-style-type: none;
-    display: flex;
-}
+        li {
+            list-style-type: none;
+            display: flex;
+        }
 
-.username {
-    align-self: center;
-}
+        .username {
+            align-self: center;
+            overflow: hidden;
+        }
 
-.story-box {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    background-color: #333;
-}
+        .story-box {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #333;
+        }
 
-.author {
-    color: #00ff00;
-    font-size: 16px;
-    margin-bottom: 8px;
-}
+        .author {
+            color: #00ff00;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
 
-.iconi {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 15px;
-    background-color: #333;
-    overflow: hidden;
-}
+        .iconi {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 15px;
+            background-color: #333;
+            overflow: hidden;
+        }
 
-h3 {
-    color: #fff;
-    font-size: 20px;
-    margin-bottom: 10px;
-}
+        h3 {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
 
-button {
-    background-color: #4CAF50;
-    color: #fff;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-button:hover {
-    background-color: #45a049;
-}
+        button:hover {
+            background-color: #45a049;
+        }
 
-a {
-    color: #fff;
-}
+        a {
+            color: #fff;
+        }
 
-a:hover {
-    color: #fff;
-}
+        a:hover {
+            color: #fff;
+        }
 
-.relat {
-    max-width: 800px;
-    flex-direction: row;
-    justify-content: space-between;
-}
+        .relat {
+            display: flex;
+            max-width: 800px;
+            flex-direction: row;
+            justify-content: space-between;
+        }
 
-.relul {
-    width: calc(30% - 20px);
-    padding: 10px;
-}
+        .relul {
+            width: calc(30% - 20px);
+            padding: 10px;
+        }
 
-.lif {
-    width: calc(100% - 20px);
-    display: flex;
-    text-align: center;
-    text-decoration: none;
-    padding: 10px;
-    background-color: #424242;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    border: 2px solid #767676;
-    box-shadow: 0 4px 8px rgba(226, 226, 226, 0.1);
-}
+        .relulp {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
 
-.puser {
-    display: none;
-}
+        .lif {
+            width: calc(100% - 20px);
+            display: flex;
+            text-align: center;
+            text-decoration: none;
+            padding: 10px;
+            background-color: #424242;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 2px solid #767676;
+            box-shadow: 0 4px 8px rgba(226, 226, 226, 0.1);
+            overflow: hidden;
+        }
 
-.cuser {
-    display: block;
-}
+        .lifp {
+            width: 80vw;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            padding: 6px;
+            background-color: #424242;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 2px solid #767676;
+            box-shadow: 0 4px 8px rgba(226, 226, 226, 0.1);
+            overflow: hidden;
+        }
 
-.linkli {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    flex-basis: 100%;
-    justify-content: space-between;
-    align-items: center;
-    border: #5c5c5c 3px solid;
-    border-radius: 30px;
-    padding: 8px;
-}
+        .puser {
+            display: none;
+        }
 
-.links {
-    flex-basis: calc(200% - 10px);
-    box-sizing: border-box;
-    text-align: center;
-    overflow-wrap: break-word;
-    color: #c2c2c2;
-    background-color: #2c2c2c;
-    border-radius: 38px;
-    font-size: 16px;
-    text-decoration: none;
-    padding: 12px;
-    margin: 5px;
-    box-shadow: 0 0 4px #aba4a4;
-}
+        .cuser {
+            display: block;
+        }
 
-@media only screen and (max-width: 651px) {
-    .cuser {
-        display: none;
-    }
+        .linkli {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            flex-basis: 100%;
+            justify-content: space-between;
+            align-items: center;
+            border: #5c5c5c 3px solid;
+            border-radius: 30px;
+            padding: 8px;
+        }
 
-    .puser {
-        display: block;
-    }
-}
+        .links {
+            flex-basis: calc(200% - 10px);
+            box-sizing: border-box;
+            text-align: center;
+            overflow-wrap: break-word;
+            color: #c2c2c2;
+            background-color: #2c2c2c;
+            border-radius: 38px;
+            font-size: 16px;
+            text-decoration: none;
+            padding: 12px;
+            margin: 5px;
+            box-shadow: 0 0 4px #aba4a4;
+        }
 
-@media only screen and (min-width: 698px) {
 
-    .plink {
-        display: none;
-    }
+        @media only screen and (max-width: 651px) {
+            .cuser {
+                display: none;
+            }
 
-    .pbar {
-        display: none;
-    }
-}
+            .puser {
+                display: block;
+            }
 
-@media only screen and (max-width: 700px) {
+        }
 
-    .linkli {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        border-radius: 30px;
-        padding: 8px;
-    }
+        @media only screen and (min-width: 698px) {
 
-    .links {
-        flex-basis: calc(200% - 10px);
-        box-sizing: border-box;
-        text-align: center;
-        overflow-wrap: break-word;
-        color: #c2c2c2;
-        border-radius: 22px;
-        font-size: clamp(16px, 3vw, 20px);
-        text-decoration: none;
-        padding: 12px;
-        margin: 5px;
-        box-shadow: 0 0 4px #aba4a4;
-    }
+            .plink {
+                display: none;
+            }
 
-    .plink {
-        display: none;
-    }
+            .pbar {
+                display: none;
+            }
 
-    .pbar {
-        display: none;
-    }
-}
+        }
 
-@media only screen and (max-width: 600px) {
-    .linkli {
-        display: none;
-    }
+        @media only screen and (max-width: 700px) {
 
-    .plink {
-        width: 100%;
-        height: 60px;
-        position: fixed;
-        bottom: 0px;
-        left: 0px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-        background-color: #000;
-        border-top-left-radius: 15px;
-        border-top-right-radius: 15px;
-        align-items: center;
-    }
+            .linkli {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                border-radius: 30px;
+                padding: 8px;
+            }
 
-    .plinks {
-        margin-left: 8px;
-        margin-right: 8px;
-        padding: 10px;
-    }
+            .links {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                border-radius: 22px;
+                font-size: clamp(16px, 3vw, 20px);
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
 
-    .icon {
-        height: 30px;
-        width: 30px;
-    }
+            .plink {
+                display: none;
+            }
 
-}
-</style>
+            .pbar {
+                display: none;
+            }
+
+        }
+
+        @media only screen and (max-width: 600px) {
+            .linkli {
+                display: none;
+            }
+
+            .plink {
+                width: 100%;
+                height: 60px;
+                position: fixed;
+                bottom: 0px;
+                left: 0px;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                background-color: #000;
+                border-top-left-radius: 15px;
+                border-top-right-radius: 15px;
+                align-items: center;
+            }
+
+            .plinks {
+                margin-left: 8px;
+                margin-right: 8px;
+                padding: 10px;
+            }
+
+            .icon {
+                flex: 1;
+                height: 30px;
+                width: 30px;
+            }
+
+            .relat {
+                display: none;
+            }
+
+            .relat-buttons {
+                display: flex;
+                justify-content: space-around;
+                margin-bottom: 15px;
+            }
+
+            .relatp {
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -252,7 +295,7 @@ a:hover {
                 <li><a class="links" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
                 <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
                 <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My Page</a></li>
-                </ul>
+            </ul>
         </div>
     </header>
 
@@ -263,14 +306,15 @@ a:hover {
                         src="{{ url_for('static', filename='icons/home.png') }}" alt="Example Icon"></a></div>
             <div class="plinks"><a href="{{ url_for('create_story', story_id=-1) }}"><img class="icon"
                         src="{{ url_for('static', filename='icons/add.png') }}" alt="Example Icon"></a></div>
-            <div class="plinks"><img class="icon" src="{{ url_for('static', filename='icons/onusers.png') }}" alt="Example Icon"></div>
-                        <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
-                            src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
+            <div class="plinks"><img class="icon" src="{{ url_for('static', filename='icons/onusers.png') }}"
+                    alt="Example Icon"></div>
+            <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
+                        src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
         </div>
 
 
         <h2>User Relations for {{ current_user.username }}</h2>
-        <div class="relat" style="display: flex;">
+        <div class="relat">
             <div class="relul">
                 <h3>Following</h3>
                 <ul>
@@ -317,7 +361,108 @@ a:hover {
                 </ul>
             </div>
         </div>
+
+
+        <div class="relat-buttons" style="display: none; justify-content: space-around; margin-bottom: 15px;">
+            <button onclick="showFollowing()">Following</button>
+            <button onclick="showFollowers()">Followers</button>
+            <button onclick="showSuggested()">Suggested</button>
+        </div>
+
+        <div class="relatp">
+            <div class="relulp" id="followingList">
+                <h3>Following</h3>
+                <ul>
+                    {% for followed_user in followed_users %}
+                    <li>
+                        <a href="{{ url_for('user_page', user_id=followed_user.followed.id) }}">
+                        <div class="lifp">
+                            <img class="iconi"
+                                src="{{ url_for('static', filename='images/profpics/' + followed_user.followed.profile_pic) }}"
+                                alt="Profile Pic">
+                            <p class="username">{{ followed_user.followed.username }}</p> 
+                        </div>
+                    </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="relulp" id="followersList" style="display: none;">
+                <h3>Followers</h3>
+                <ul>
+                    {% for follower in followers %}
+                    <li>
+                        <a href="{{ url_for('user_page', user_id=follower.follower.id) }}">
+                        <div class="lifp">
+                        <img class="iconi"
+                            src="{{ url_for('static', filename='images/profpics/' + follower.follower.profile_pic) }}"
+                            alt="Profile Pic">
+                            <p class="username">{{ follower.follower.username }}</p> 
+                        </div>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="relulp" id="suggestedList" style="display: none;">
+                <h3>Suggested Users</h3>
+                <ul>
+                    {% for suggested_user in suggested_users %}
+                    <li>
+                        <a href="{{ url_for('user_page', user_id=suggested_user.id) }}">
+                        <div class="lifp">
+                        <img class="iconi"
+                            src="{{ url_for('static', filename='images/profpics/' + suggested_user.profile_pic) }}"
+                            alt="Profile Pic">
+                        <p class="username">{{ suggested_user.username }}</p>
+                        </div>
+                    </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+
     </main>
+
+    <script>
+        function showFollowing() {
+            document.getElementById("followingList").style.display = "flex";
+            document.getElementById("followersList").style.display = "none";
+            document.getElementById("suggestedList").style.display = "none";
+        }
+
+        function showFollowers() {
+            document.getElementById("followingList").style.display = "none";
+            document.getElementById("followersList").style.display = "flex";
+            document.getElementById("suggestedList").style.display = "none";
+        }
+
+        function showSuggested() {
+            document.getElementById("followingList").style.display = "none";
+            document.getElementById("followersList").style.display = "none";
+            document.getElementById("suggestedList").style.display = "flex";
+        }
+
+        // Check screen width and toggle visibility of buttons and lists
+        function checkScreenWidth() {
+            var screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+            if (screenWidth < 600) {
+                document.querySelector('.relat-buttons').style.display = 'flex';
+                document.querySelector('.relatp').style.display = 'block';
+            } else {
+                document.querySelector('.relat-buttons').style.display = 'none';
+                document.querySelector('.relatp').style.display = 'none';
+            }
+        }
+
+        // Call the function on page load and resize
+        window.onload = checkScreenWidth;
+        window.onresize = checkScreenWidth;
+    </script>
+
 </body>
 
 </html>
