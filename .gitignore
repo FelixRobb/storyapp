@@ -32,3 +32,6 @@ Desktop.ini
 *.swp
 .tmp.drivedownload
 .tmp.driveupload
+.venv
+__pycache__
+/templates/old\ templates/
