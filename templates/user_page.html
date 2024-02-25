@@ -305,6 +305,18 @@
             #createbot {
                 display: none;
             }
+        				
+        				.buttpro {
+        								display: flex;
+        								flex-direction: row;
+        								justify-content: space-between;
+        								align-items: center;
+        				}
+        				
+        				.linkss {
+        								width: 30px;
+        								height: 30px;
+        				}
         }
     </style>
 </head>
@@ -320,9 +332,9 @@
             <ul class="linkli">
                 <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
                 <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
+                <li><a class="links" href="{{ url_for('user_relations') }}">User Relations</a></li>
                 <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
-                <li><a class="links" href="{{ url_for('user_settings') }}">settings</a></li>
-                <li><a class="links" href="{{ url_for('logout') }}">Logout</a></li>
+                <li><a class="links" href="{{ url_for('user_settings') }}">Settings</a></li>
             </ul>
 
         </div>
@@ -341,7 +353,11 @@
             <div class="profile-details">
                 <div class="profile-username">{{ current_user.username }}</div>
                 <p class="profile-bio">{{ current_user.bio }}</p>
-                <a class="edit-profile-button" href="{{ url_for('edit_profile', user_id=user.id) }}">Edit Profile</a>
+            				<div class="buttpro">
+                    <a class="edit-profile-button" href="{{ url_for('edit_profile', user_id=user.id) }}">Edit Profile</a>
+                				<a class="linkss" href="{{ url_for('user_settings') }}"><img class="icon" src="{{ url_for('static', filename='icons/settings.png') }}"
+                    alt="settings"></a>
+            				</div>
             </div>
         </div>
 
@@ -364,8 +380,8 @@
                 <li class="story-box">
                     <div class="author">{{ story.author.username }}</div>
                     <h3>{{ story.title }}</h3>
-                    <p class="synopsis">{{ story.synopsis[:200] }}</p>
-                    <div class="content-preview">{{ story.content[:100] }}...</div>
+                    <p class="synopsis">{{ story.synopsis }}</p>
+                    <div class="content-preview">{{ story.content[:10] }}...</div>
                     <p class="tags">Tags: {{ story.tags }}</p>
                 </li>
             </a>
