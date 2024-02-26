@@ -134,6 +134,24 @@
             color: #ffffff;
         }
 
+        .linkss {
+            width: 30px;
+            height: 30px;
+        }
+
+        .icon {
+            height: 30px;
+            width: 30px;
+
+        }
+
+        .buttpro {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .linkli {
             display: flex;
             flex-direction: row;
@@ -305,18 +323,18 @@
             #createbot {
                 display: none;
             }
-        				
-        				.buttpro {
-        								display: flex;
-        								flex-direction: row;
-        								justify-content: space-between;
-        								align-items: center;
-        				}
-        				
-        				.linkss {
-        								width: 30px;
-        								height: 30px;
-        				}
+
+            .buttpro {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .linkss {
+                width: 30px;
+                height: 30px;
+            }
         }
     </style>
 </head>
@@ -327,7 +345,7 @@
         <div class="headt">
             <h2>STORIA</h2>
         </div>
-        
+
         <div>
             <ul class="linkli">
                 <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
@@ -353,11 +371,12 @@
             <div class="profile-details">
                 <div class="profile-username">{{ current_user.username }}</div>
                 <p class="profile-bio">{{ current_user.bio }}</p>
-            				<div class="buttpro">
-                    <a class="edit-profile-button" href="{{ url_for('edit_profile', user_id=user.id) }}">Edit Profile</a>
-                				<a class="linkss" href="{{ url_for('user_settings') }}"><img class="icon" src="{{ url_for('static', filename='icons/settings.png') }}"
-                    alt="settings"></a>
-            				</div>
+                <div class="buttpro">
+                    <a class="edit-profile-button" href="{{ url_for('edit_profile', user_id=user.id) }}">Edit
+                        Profile</a>
+                    <a class="linkss" href="{{ url_for('user_settings') }}"><img class="icon"
+                            src="{{ url_for('static', filename='icons/settings.png') }}" alt="settings"></a>
+                </div>
             </div>
         </div>
 
@@ -380,8 +399,8 @@
                 <li class="story-box">
                     <div class="author">{{ story.author.username }}</div>
                     <h3>{{ story.title }}</h3>
-                    <p class="synopsis">{{ story.synopsis }}</p>
-                    <div class="content-preview">{{ story.content[:10] }}...</div>
+                    <p class="synopsis">{{ story.synopsis[:200] }}</p>
+                    <div class="content-preview">{{ story.content[:100]|safe }}...</div>
                     <p class="tags">Tags: {{ story.tags }}</p>
                 </li>
             </a>
