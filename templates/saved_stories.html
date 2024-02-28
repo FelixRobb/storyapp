@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile</title>
+    <title>Saved Stories</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <style>
         body {
@@ -24,62 +24,7 @@
             color: #b9b9b9;
         }
 
-        a {
-            color: #fff;
-        }
-
-        .profile-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .profile-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-right: 20px;
-            background-color: #333;
-            overflow: hidden;
-        }
-
-        .profile-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-details {
-            flex: 1;
-        }
-
-        .profile-username {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .profile-bio {
-            color: #aaa;
-            margin-bottom: 12px;
-        }
-
-        .edit-profile-button {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: inline-block;
-        }
-
-        .edit-profile-button:hover {
-            background-color: #45a049;
-        }
-
         .story {
-            gap: 6px;
-            flex-wrap: wrap;
             list-style-type: none;
             padding: 0;
             margin-bottom: 20px;
@@ -90,13 +35,11 @@
         }
 
         .story-box {
-            display: block;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
             background-color: #333;
-            text-decoration: none;
         }
 
         .author {
@@ -126,30 +69,57 @@
             margin-bottom: 12px;
         }
 
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a:hover {
+            color: #8c8c8c;
+        }
+
+        .story-box {
+            display: block;
+            text-decoration: none;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            /* Set the display property to inline-block */
+        }
+
+        input {
+            width: calc(100% /1.8);
+            height: 25px;
+            background: none;
+            border: 1px;
+            border-radius: 40px;
+            color: #fff;
+            padding: 5px;
+        }
+
         a {
+            color: #fff;
             text-decoration: none;
         }
 
         a:hover {
-            color: #ffffff;
-        }
-
-        .linkss {
-            width: 30px;
-            height: 30px;
-        }
-
-        .icon {
-            height: 30px;
-            width: 30px;
-
-        }
-
-        .buttpro {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
+            color: #fff;
         }
 
         .linkli {
@@ -161,6 +131,7 @@
             align-items: center;
             border: #5c5c5c 3px solid;
             border-radius: 30px;
+            padding: 5px;
             padding: 8px;
         }
 
@@ -179,7 +150,13 @@
             box-shadow: 0 0 4px #aba4a4;
         }
 
-        @media only screen and (min-width: 698px) {
+        .content-preview {
+            width: 100%;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        @media only screen and (min-width: 800px) {
 
             .create {
                 flex-basis: calc(200% - 10px);
@@ -200,6 +177,10 @@
                 display: none;
             }
 
+            .search-form2 {
+                display: none;
+            }
+
             .plink {
                 display: none;
             }
@@ -208,18 +189,31 @@
                 display: none;
             }
 
+            .linksn {
+                display: none;
+            }
+
+            .linksp {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                background-color: #2c2c2c;
+                border-radius: 38px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
+
         }
 
-        @media only screen and (max-width: 700px) {
+        @media only screen and (max-width: 800px) {
 
             .create {
-                box-sizing: border-box;
-                content: "";
                 display: none;
-                margin: 0px;
-                padding: 0px;
-                box-shadow: 0px;
-                width: 0px;
             }
 
             #createbot {
@@ -242,9 +236,12 @@
                 flex-direction: row;
                 flex-wrap: wrap;
                 justify-content: space-between;
+                align-items: center;
+                border: #5c5c5c 3px solid;
                 border-radius: 30px;
+                padding: 5px;
                 padding: 8px;
-
+                gap: 5px;
             }
 
             .links {
@@ -253,8 +250,9 @@
                 text-align: center;
                 overflow-wrap: break-word;
                 color: #c2c2c2;
-                border-radius: 22px;
-                font-size: clamp(16px, 3vw, 20px);
+                background-color: #2c2c2c;
+                border-radius: 38px;
+                font-size: 16px;
                 text-decoration: none;
                 padding: 12px;
                 margin: 5px;
@@ -269,7 +267,59 @@
                 display: none;
             }
 
+            .linksn {
+                display: none;
+            }
 
+            .linksp {
+                flex-basis: calc(200% - 10px);
+                box-sizing: border-box;
+                text-align: center;
+                overflow-wrap: break-word;
+                color: #c2c2c2;
+                background-color: #2c2c2c;
+                border-radius: 38px;
+                font-size: 16px;
+                text-decoration: none;
+                padding: 12px;
+                margin: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
+
+        }
+
+        .headt {
+            display: flex;
+            height: 80px;
+            text-align: center;
+            font-size: 18px;
+            border-top: 1px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 2px solid #56f35c8f;
+            margin-bottom: 40px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 40px;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media only screen and (max-width: 663px) {
+            .linksp {
+                display: none;
+            }
+
+            .linksn {
+                display: inline;
+                height: 30px;
+                width: 30px;
+            }
+
+            .icon {
+                height: 30px;
+                width: 30px;
+            }
         }
 
         @media only screen and (max-width: 600px) {
@@ -295,19 +345,12 @@
             .plinks {
                 margin-left: 8px;
                 margin-right: 8px;
-                padding: 10px;
             }
 
             .icon {
                 height: 30px;
                 width: 30px;
 
-            }
-
-            .search-form {
-                display: flex;
-                flex-wrap: nowrap;
-                width: 100vw;
             }
 
             input {
@@ -324,17 +367,26 @@
                 display: none;
             }
 
-            .buttpro {
+            .pbar {
                 display: flex;
-                flex-direction: row;
-                justify-content: space-between;
                 align-items: center;
+                justify-content: space-between;
             }
 
-            .linkss {
-                width: 30px;
-                height: 30px;
+            .search-form2 {
+                width: 50%;
+                height: 35px;
+                background-color: #2b2b2b;
+                border-radius: 22px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                text-align: center;
+                padding: 5px;
+                box-shadow: 0 0 4px #aba4a4;
             }
+
         }
     </style>
 </head>
@@ -345,73 +397,51 @@
         <div class="headt">
             <h2>STORIA</h2>
         </div>
-
         <div>
             <ul class="linkli">
                 <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
-                <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create Story</a></li>
-                <li><a class="links" href="{{ url_for('user_relations') }}">User Relations</a></li>
-                <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
-                <li><a class="links" href="{{ url_for('user_settings') }}">Settings</a></li>
+                <li><a class="links" href="{{ url_for('create_story', story_id=-1) }}">Create
+                        Story</a></li>
+                <li><a class="links" href="{{ url_for('user_relations') }}">User
+                        Relations</a></li>
+                        <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My
+                            Page</a></li>
             </ul>
-
         </div>
     </header>
     <main>
-        <div class="profile-info">
-            <div class="profile-image">
-                {% if user.profile_pic %}
-                <img src="{{ url_for('static', filename='images/profpics/' + user.profile_pic) }}"
-                    alt="{{ user.username }}'s Profile Picture">
-                {% else %}
-                <img src="{{ url_for('static', filename='images/profpics/default_profile_pic.png') }}"
-                    alt="{{ user.username }}'s Default Profile Picture">
-                {% endif %}
-            </div>
-            <div class="profile-details">
-                <div class="profile-username">{{ current_user.username }}</div>
-                <p class="profile-bio">{{ current_user.bio }}</p>
-                <div class="buttpro">
-                    <a class="edit-profile-button" href="{{ url_for('edit_profile', user_id=user.id) }}">Edit
-                        Profile</a>
-                        
-                    <div style="width: 120px; display: flex; flex-direction: row; justify-content: space-between;">
-                    <a class="linkss" href="{{ url_for('search_saved_stories') }}">Saved Stories</a>
-                    <a class="linkss" href="{{ url_for('user_settings') }}"><img class="icon"
-                            src="{{ url_for('static', filename='icons/settings.png') }}" alt="settings"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="plink">
-            <div class="plinks"><a href="{{ url_for('index') }}"><img class="icon"
-                        src="{{ url_for('static', filename='icons/home.png') }}" alt="Example Icon"></a></div>
+            <div class="plinks"><img class="icon" src="{{ url_for('static', filename='icons/onhome.png') }}"
+                    alt="Example Icon"></a></div>
             <div class="plinks"><a href="{{ url_for('create_story', story_id=-1) }}"><img class="icon"
                         src="{{ url_for('static', filename='icons/add.png') }}" alt="Example Icon"></a></div>
             <div class="plinks"><a href="{{ url_for('user_relations') }}"><img class="icon"
                         src="{{ url_for('static', filename='icons/users.png') }}" alt="Example Icon"></a></div>
-            <div class="plinks"><img class="icon" src="{{ url_for('static', filename='icons/onuser.png') }}"
-                    alt="Example Icon"></div>
+            <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
+                        src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
         </div>
-
-        <h2>My Stories</h2>
-
+        <div class="pbar">
+            <h2>Saved Stories</h2>
+            <div class="search-form2">
+                <form action="{{ url_for('search_saved_stories') }}" method="POST">
+                    <input type="text" name="search_query" placeholder="Search saved stories...">
+                    <button style="display: inline; border-radius: 50px;" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
         <ul class="story">
-            {% for story in user_stories %}
+            {% for story in saved_stories %}
             <a id="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
                 <li class="story-box">
                     <div class="author">{{ story.author.username }}</div>
                     <h3>{{ story.title }}</h3>
                     <p class="synopsis">{{ story.synopsis[:200] }}</p>
-                    <div class="content-preview">{{ story.content[:100]|safe }}...</div>
+                    <div class="content-preview" style="overflow: hidden;">{{ story.content[:100]|safe }}...</div>
                     <p class="tags">Tags: {{ story.tags }}</p>
                 </li>
             </a>
             {% endfor %}
         </ul>
-        <li><a id="createbot" href="{{ url_for('create_story', story_id=-1) }}">Create
-                Story</a></li>
     </main>
 </body>
 

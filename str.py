@@ -836,68 +836,6 @@ def privacy_settings():
         return redirect(url_for('privacy_settings'))
     return render_template('privacy_settings.html', user=current_user)
 
-# Request Password reset
-@app.route('/request_reset_password', methods=['GET', 'POST'])
-def request_reset_password():
-    form = RequestPasswordResetForm()
-
-    if form.validate_on_submit():
-        email = form.email.data
-        user = User.query.filter_by(email=email).first()
-
-        if user:
-            # Generate and store reset token
-            user.generate_reset_token()
-            db.session.commit()
-
-            # Send email to user with reset link
-            send_reset_email(user.email, user.reset_token)
-
-            flash('Password reset email sent. Check your inbox.', 'success')
-            return redirect(url_for('see_email'))
-        else:
-            flash('User not found with the provided email.', 'error')
-
-    return render_template('request_reset_password.html', form=form)
-
-
-
-# Reset password
-@app.route('/reset_password/<string:token>', methods=['GET', 'POST'])
-def reset_password(token):
-    user = User.query.filter_by(reset_token=token).first()
-
-    if not user:
-        abort(404)  # Token not found
-
-    form = PasswordResetForm()
-
-    if form.validate_on_submit():
-        # Ensure the provided email matches the user's registered email
-        if form.email.data != user.email:
-            flash('Invalid email for password reset.', 'error')
-            return redirect(url_for('login'))
-
-        # Ensure the new password matches the confirmation
-        if form.new_password.data != form.confirm_password.data:
-            flash('New password and confirmation do not match.', 'error')
-            return redirect(request.url)
-
-        # Update the password and clear the reset_token
-        user.set_password(form.new_password.data)
-        user.reset_token = None
-        db.session.commit()
-
-        flash('Password reset successfully! Please log in with your new password.', 'success')
-        return redirect(url_for('login'))
-
-    return render_template('reset_password.html', form=form)
-
-
-# see email
-@app.route('/see_email')
-def see_email():
-    return render_template('see_email.html')
 
 # Run app
 if __name__ == "__main__":

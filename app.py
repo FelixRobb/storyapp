@@ -94,6 +94,7 @@ class User(db.Model, UserMixin):
     language = db.Column(db.String(10), default='en')  # Example: 'en' for English
     bio = db.Column(db.String(255))
     stories = db.relationship('Story', back_populates='author', lazy=True)
+    saved_stories = db.relationship('SavedStory', backref='user', lazy=True)
     comments = db.relationship('Comment', backref='author', lazy=True)
     followers = db.relationship('Follow', foreign_keys='Follow.followed_id', backref='followed', lazy='dynamic')
     followed = db.relationship('Follow', foreign_keys='Follow.follower_id', backref='follower', lazy='dynamic')
@@ -160,7 +161,16 @@ class Story(db.Model):
     author = db.relationship('User', back_populates='stories')
     versions = db.relationship('Version', back_populates='story', foreign_keys="[Version.story_id]")
     comments = db.relationship('Comment', back_populates='story', lazy=True)
+    saved_by_users = db.relationship('SavedStory', backref='story', lazy=True)
     edit_proposals = db.relationship('EditProposal', back_populates='story', lazy=True)
+
+
+# Saved story class
+class SavedStory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    story_id = db.Column(db.Integer, db.ForeignKey('story.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 # Comment class
@@ -456,6 +466,24 @@ def search_results():
     return render_template('search_results.html', query=None, story_results=None, user_results=None)
 
 
+# Save story
+@app.route('/story/<int:story_id>/save', methods=['POST'])
+@login_required
+def save_story(story_id):
+    story = Story.query.get(story_id)
+
+    if story:
+        # Check if the story is already saved by the user
+        if current_user.saved_stories.filter_by(story_id=story_id).first():
+            return jsonify({'message': 'Story is already saved.'}), 400
+
+        saved_story = SavedStory(user=current_user, story=story)
+        db.session.add(saved_story)
+        db.session.commit()
+        return jsonify({'message': 'Story saved successfully.'})
+
+    return jsonify({'message': 'Story not found.'}), 404
+
 # Create story
 @app.route('/create_story', methods=['GET', 'POST'])
 @login_required
@@ -512,6 +540,14 @@ def view_story(story_id):
     else:
         return "Story not found", 404
 
+
+# Saved stories
+@app.route('/search_saved_stories', methods=['GET', 'POST'])
+@login_required
+def search_saved_stories():
+    search_query = request.form.get('search_query', '')
+    saved_stories = current_user.saved_stories.filter(Story.title.ilike(f"%{search_query}%")).all()
+    return render_template('saved_stories.html', saved_stories=saved_stories)
 
 # edit story
 @app.route('/story/edit/<int:story_id>', methods=['GET', 'POST'])

@@ -92,6 +92,7 @@
         .story-box {
             display: block;
             text-decoration: none;
+            position: relative;
         }
 
 
@@ -112,14 +113,29 @@
         input {
             width: calc(100% /1.8);
             height: 25px;
-            background: none;
+            background:none;
             border: 1px;
             border-radius: 40px;
             color: #fff;
             padding: 5px;
         }
 
+        .savestr {
+            position: absolute;
+            background: none;
+            top: 5px; /* Adjust the top position as needed */
+            right: 5px; /* Adjust the right position as needed */
+            padding: 3px;
+        }
 
+        .savestr:hover {
+            background: #5e5e5e;
+        }
+
+        .iconsave {  
+            width: 30px;
+            height: 30px;
+        }
         a {
             color: #fff;
             text-decoration: none;
@@ -474,17 +490,45 @@
             <a id="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
                 <li class="story-box">
                     <div class="author">{{ story.author.username }}</div>
+                    
                     <h3>{{ story.title }}</h3>
                     <p class="synopsis">{{ story.synopsis[:200] }}</p>
                     <div class="content-preview" style="overflow: hidden;">{{ story.content[:100]|safe }}...</div>
                     <p class="tags">Tags: {{ story.tags }}</p>
+                </a>
+                <div class="save-button">
+                    <button class="savestr" onclick="saveStory({{ story.id }})"><img class="iconsave" src="{{ url_for('static', filename='icons/save.png') }}" alt="save story"></button>
+                </div>
                 </li>
-            </a>
             {% endfor %}
         </ul>
         <li><a id="createbot" href="{{ url_for('create_story', story_id=-1) }}">Create
                 Story</a></li>
     </main>
+    <script>
+        function saveStory(storyId) {
+            fetch(`/story/${storyId}/save`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({}),
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Optionally, update the button or provide feedback to the user
+                    console.log('Story saved successfully!');
+                } else {
+                    console.error('Failed to save story.');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving story:', error);
+            });
+        }
+    </script>
 </body>
 
 </html>
