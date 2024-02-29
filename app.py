@@ -2,7 +2,6 @@
 
 
 import os
-import re
 import string
 import random
 import hashlib 
@@ -12,6 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_argon2 import Argon2
 from flask_migrate import Migrate
 from sqlalchemy import func, or_
+from sqlalchemy.orm import aliased
 from datetime import datetime, timezone
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, FileField, validators, PasswordField, BooleanField, SelectField
@@ -397,8 +397,6 @@ def register():
 
 
 
-# index/Feed
-# ...
 
 # index/Feed
 @app.route('/', methods=['GET', 'POST'])
@@ -411,15 +409,16 @@ def index():
                 return redirect(url_for('search_results', query=search_query))
             else:
                 # Fetch all stories if no search query is provided
+                saved_stories_alias = aliased(SavedStory)
                 subquery = db.session.query(
-                    Version.story_id,
-                    func.max(Version.date).label('max_date')
-                ).group_by(Version.story_id).subquery()
+                    saved_stories_alias.story_id,
+                    func.max(saved_stories_alias.date).label('max_date')
+                ).filter(saved_stories_alias.user_id == current_user.id).group_by(saved_stories_alias.story_id).subquery()
 
                 stories = (
                     Story.query
-                    .join(subquery, Story.id == subquery.c.story_id)
-                    .order_by(subquery.c.max_date.desc())
+                    .join(subquery, Story.id == subquery.c.story_id, isouter=True)
+                    .order_by(subquery.c.max_date.desc().nullslast())
                     .all()
                 )
 
@@ -427,15 +426,16 @@ def index():
                 return render_template('feed.html', stories=stories, unread_notifications=unread_notifications)
         else:
             # Your existing code for fetching stories without search
+            saved_stories_alias = aliased(SavedStory)
             subquery = db.session.query(
-                Version.story_id,
-                func.max(Version.date).label('max_date')
-            ).group_by(Version.story_id).subquery()
+                saved_stories_alias.story_id,
+                func.max(saved_stories_alias.timestamp).label('max_date')
+            ).filter(saved_stories_alias.user_id == current_user.id).group_by(saved_stories_alias.story_id).subquery()
 
             stories = (
                 Story.query
-                .join(subquery, Story.id == subquery.c.story_id)
-                .order_by(subquery.c.max_date.desc())
+                .join(subquery, Story.id == subquery.c.story_id, isouter=True)
+                .order_by(subquery.c.max_date.desc().nullslast())
                 .all()
             )
 
@@ -444,7 +444,6 @@ def index():
             return render_template('feed.html', stories=stories, unread_notifications=unread_notifications)
     else:
         return redirect(url_for('entry_page'))
-
 
 # Search results
 @app.route('/search_results', methods=['GET', 'POST'])
@@ -466,23 +465,27 @@ def search_results():
     return render_template('search_results.html', query=None, story_results=None, user_results=None)
 
 
-# Save story
 @app.route('/story/<int:story_id>/save', methods=['POST'])
 @login_required
 def save_story(story_id):
     story = Story.query.get(story_id)
 
-    if story:
-        # Check if the story is already saved by the user
-        if current_user.saved_stories.filter_by(story_id=story_id).first():
-            return jsonify({'message': 'Story is already saved.'}), 400
+    if not story:
+        return jsonify({'error': 'Story not found'}), 404
 
-        saved_story = SavedStory(user=current_user, story=story)
-        db.session.add(saved_story)
+    saved_story = SavedStory.query.filter_by(user_id=current_user.id, story_id=story_id).first()
+
+    if saved_story:
+        # Story is already saved, so unsave it
+        db.session.delete(saved_story)
         db.session.commit()
-        return jsonify({'message': 'Story saved successfully.'})
-
-    return jsonify({'message': 'Story not found.'}), 404
+        return jsonify({'status': 'unsaved'})
+    else:
+        # Story is not saved, so save it
+        new_saved_story = SavedStory(user_id=current_user.id, story_id=story_id)
+        db.session.add(new_saved_story)
+        db.session.commit()
+        return jsonify({'status': 'saved'})
 
 # Create story
 @app.route('/create_story', methods=['GET', 'POST'])
