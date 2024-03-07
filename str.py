@@ -2,15 +2,16 @@
 
 
 import os
-import re
 import string
 import random
+import hashlib 
 from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_argon2 import Argon2
 from flask_migrate import Migrate
 from sqlalchemy import func, or_
+from sqlalchemy.orm import aliased
 from datetime import datetime, timezone
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, FileField, validators, PasswordField, BooleanField, SelectField
@@ -23,6 +24,8 @@ from random import SystemRandom
 secrets = SystemRandom()
 
 app = Flask(__name__)
+
+
 app.config['SECRET_KEY'] = "knkdjnkjnjdjdj"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stories.db'
 app.config['IMAGE_UPLOAD_FOLDER'] = 'static/images/profpics'
@@ -48,6 +51,19 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 migrate = Migrate(app, db)
 mail = Mail(app)
+
+# cache control
+@app.after_request
+def add_cache_control(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+def generate_etag(content):
+    hash_object = hashlib.md5(content)
+    etag = hash_object.hexdigest()
+    return etag
 
 # image functions
 def allowed_file(filename):
@@ -78,11 +94,12 @@ class User(db.Model, UserMixin):
     language = db.Column(db.String(10), default='en')  # Example: 'en' for English
     bio = db.Column(db.String(255))
     stories = db.relationship('Story', back_populates='author', lazy=True)
+    saved_stories = db.relationship('SavedStory', backref='user', lazy=True)
     comments = db.relationship('Comment', backref='author', lazy=True)
     followers = db.relationship('Follow', foreign_keys='Follow.followed_id', backref='followed', lazy='dynamic')
     followed = db.relationship('Follow', foreign_keys='Follow.follower_id', backref='follower', lazy='dynamic')
     notifications = db.relationship('Notification', backref='user', lazy=True)
-    profile_pic = db.Column(db.String(255), default='default_profile_pic.jpg')
+    profile_pic = db.Column(db.String(255), default='default_profile_pic.png')
     email = db.Column(db.String(120), unique=True, nullable=False)
     reset_token = db.Column(db.String(100), nullable=True)
     is_author = db.Column(db.Boolean, default=False)
@@ -111,8 +128,10 @@ class User(db.Model, UserMixin):
     def get_user_stories(self):
         return Story.query.filter_by(author=self).all()
 
-    def get_followers(self):
-        return self.followers.all()
+    def has_unread_notifications(self):
+        unread_notifications = Notification.query.filter_by(user_id=self.id, read=False).count()
+        print(f"Unread notifications count for user {self.id}: {unread_notifications}")
+        return unread_notifications > 0
 
 # Send emails
 def send_reset_email(email, token):
@@ -142,7 +161,16 @@ class Story(db.Model):
     author = db.relationship('User', back_populates='stories')
     versions = db.relationship('Version', back_populates='story', foreign_keys="[Version.story_id]")
     comments = db.relationship('Comment', back_populates='story', lazy=True)
+    saved_by_users = db.relationship('SavedStory', backref='story', lazy=True)
     edit_proposals = db.relationship('EditProposal', back_populates='story', lazy=True)
+
+
+# Saved story class
+class SavedStory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    story_id = db.Column(db.Integer, db.ForeignKey('story.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 # Comment class
@@ -194,6 +222,7 @@ class Notification(db.Model):
     content = db.Column(db.String(200), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    read = db.Column(db.Boolean, default=False)
 
 
 # Flask forms
@@ -285,6 +314,12 @@ class RequestPasswordResetForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 
+# Custom error handler
+@app.errorhandler(500)
+def internal_server_error(error):
+    return render_template('error.html'), 500
+
+    
 # Routes
 
 @login_manager.user_loader
@@ -362,8 +397,6 @@ def register():
 
 
 
-# index/Feed
-# ...
 
 # index/Feed
 @app.route('/', methods=['GET', 'POST'])
@@ -376,38 +409,41 @@ def index():
                 return redirect(url_for('search_results', query=search_query))
             else:
                 # Fetch all stories if no search query is provided
+                saved_stories_alias = aliased(SavedStory)
                 subquery = db.session.query(
-                    Version.story_id,
-                    func.max(Version.date).label('max_date')
-                ).group_by(Version.story_id).subquery()
+                    saved_stories_alias.story_id,
+                    func.max(saved_stories_alias.date).label('max_date')
+                ).filter(saved_stories_alias.user_id == current_user.id).group_by(saved_stories_alias.story_id).subquery()
 
                 stories = (
                     Story.query
-                    .join(subquery, Story.id == subquery.c.story_id)
-                    .order_by(subquery.c.max_date.desc())
+                    .join(subquery, Story.id == subquery.c.story_id, isouter=True)
+                    .order_by(subquery.c.max_date.desc().nullslast())
                     .all()
                 )
 
-                return render_template('feed.html', stories=stories)
+                unread_notifications = current_user.has_unread_notifications()
+                return render_template('feed.html', stories=stories, unread_notifications=unread_notifications)
         else:
             # Your existing code for fetching stories without search
+            saved_stories_alias = aliased(SavedStory)
             subquery = db.session.query(
-                Version.story_id,
-                func.max(Version.date).label('max_date')
-            ).group_by(Version.story_id).subquery()
+                saved_stories_alias.story_id,
+                func.max(saved_stories_alias.timestamp).label('max_date')
+            ).filter(saved_stories_alias.user_id == current_user.id).group_by(saved_stories_alias.story_id).subquery()
 
             stories = (
                 Story.query
-                .join(subquery, Story.id == subquery.c.story_id)
-                .order_by(subquery.c.max_date.desc())
+                .join(subquery, Story.id == subquery.c.story_id, isouter=True)
+                .order_by(subquery.c.max_date.desc().nullslast())
                 .all()
             )
-            followed_users = current_user.followed
 
-            return render_template('feed.html', stories=stories, followed_users=followed_users)
+            unread_notifications = current_user.has_unread_notifications()
+
+            return render_template('feed.html', stories=stories, unread_notifications=unread_notifications)
     else:
         return redirect(url_for('entry_page'))
-
 
 # Search results
 @app.route('/search_results', methods=['GET', 'POST'])
@@ -428,6 +464,28 @@ def search_results():
 
     return render_template('search_results.html', query=None, story_results=None, user_results=None)
 
+
+@app.route('/story/<int:story_id>/save', methods=['POST'])
+@login_required
+def save_story(story_id):
+    story = Story.query.get(story_id)
+
+    if not story:
+        return jsonify({'error': 'Story not found'}), 404
+
+    saved_story = SavedStory.query.filter_by(user_id=current_user.id, story_id=story_id).first()
+
+    if saved_story:
+        # Story is already saved, so unsave it
+        db.session.delete(saved_story)
+        db.session.commit()
+        return jsonify({'status': 'unsaved'})
+    else:
+        # Story is not saved, so save it
+        new_saved_story = SavedStory(user_id=current_user.id, story_id=story_id)
+        db.session.add(new_saved_story)
+        db.session.commit()
+        return jsonify({'status': 'saved'})
 
 # Create story
 @app.route('/create_story', methods=['GET', 'POST'])
@@ -452,7 +510,7 @@ def create_story():
 
         # Create an initial version for the story
         initial_version = Version(
-            date=datetime.now(timezone.utc).strftime('%Y-%m-%d'),
+            date=datetime.utcnow(),
             content=content.replace('\n', '<br>'),  # Convert newline characters to <br>
             story=new_story
         )
@@ -486,7 +544,41 @@ def view_story(story_id):
         return "Story not found", 404
 
 
-# edit story
+# Saved stories
+@app.route('/saved_stories')
+@login_required
+def saved_stories():
+    search_query = request.args.get('search', default='', type=str)
+    
+    # Filter saved stories based on the search query
+    saved_stories = SavedStory.query.filter(
+    (SavedStory.user_id == current_user.id) &
+    SavedStory.story.has(Story.title.ilike(f"%{search_query}%"))
+).all()
+
+
+    return render_template('saved_stories.html', saved_stories=saved_stories)
+
+
+# Search saved stories
+@app.route('/search_saved_stories', methods=['GET'])
+@login_required
+def search_saved_stories():
+    search_query = request.args.get('query', '').strip()
+
+    if search_query:
+        saved_stories = SavedStory.query.join(Story).filter(
+            SavedStory.user_id == current_user.id,
+            Story.title.ilike(f"%{search_query}%")
+        ).all()
+
+        search_results = [{'title': story.story.title, 'url': url_for('view_story', story_id=story.story.id)} for story in saved_stories]
+        return jsonify(search_results)
+
+    return jsonify([])
+
+
+# Edit story
 @app.route('/story/edit/<int:story_id>', methods=['GET', 'POST'])
 @login_required
 def edit_story(story_id):
@@ -528,6 +620,17 @@ def edit_story(story_id):
             db.session.add(edit_proposal)
             db.session.commit()
 
+            # Create a notification for the author
+            notification_content = f"New edit proposal for your story '{story.title}'."
+            notification = Notification(
+                content=notification_content,
+                user=story.author,
+                read=False
+            )
+
+            db.session.add(notification)
+            db.session.commit()
+
             flash('Edit proposal submitted. The author will review and approve it.', 'info')
             return redirect(url_for('view_story', story_id=story_id))
 
@@ -547,7 +650,6 @@ def handle_edit_proposal(proposal_id, action):
         if action == 'accept':
             # Apply the accepted edit to the story
             proposal.story.content = proposal.content
-            proposal.story.tags = proposal.tags
             proposal.status = 'accepted'
             proposal.author_approval = True
             db.session.commit()
@@ -647,7 +749,6 @@ def user_page(user_id):
 
     if user:
         user_stories = user.get_user_stories()
-        followers = user.get_followers()
 
         # Check if the current user is viewing their own page or another user's page
         is_own_page = user == current_user
@@ -655,15 +756,11 @@ def user_page(user_id):
         # Check if the current user is following the displayed user
         is_following = current_user.is_following(user)
 
-        # Retrieve a list of users that the current user does not follow but has a connection with
-        suggested_users = User.query.filter(User.id != current_user.id, ~current_user.followers.filter_by(follower_id=User.id).exists()).all()
-
+        
         if is_own_page:
-            return render_template('user_page.html', user=user, user_stories=user_stories, followers=followers,
-                                   suggested_users=suggested_users, is_own_page=is_own_page, is_following=is_following)
+            return render_template('user_page.html', user=user, user_stories=user_stories, is_own_page=is_own_page, is_following=is_following)
         else:
-            return render_template('other_user_page.html', user=user, user_stories=user_stories, followers=followers,
-                                   suggested_users=suggested_users, is_own_page=is_own_page, is_following=is_following)
+            return render_template('other_user_page.html', user=user, user_stories=user_stories, is_own_page=is_own_page, is_following=is_following)
     else:
         return "User not found", 404
 
@@ -695,11 +792,11 @@ def edit_profile(user_id):
                     profile_pic.save(original_path)
 
                     # Convert the image to PNG
-                    png_path = os.path.join(app.config['UPLOAD_FOLDER'], username_filename)
+                    png_path = os.path.join(app.config['IMAGE_UPLOAD_FOLDER'], username_filename)
                     convert_to_png(original_path, png_path)
 
                     # Resize the image for the profile picture
-                    profile_pic_path = os.path.join(app.config['UPLOAD_FOLDER'], username_filename)
+                    profile_pic_path = os.path.join(app.config['IMAGE_UPLOAD_FOLDER'], username_filename)
                     resize_image(png_path, profile_pic_path, size=(200, 200))
 
                     # Update the user profile pic path in the database with the username and PNG extension
@@ -727,22 +824,33 @@ def edit_profile(user_id):
 @login_required
 def user_relations():
     user = current_user
-    followed_users = user.followers.all()
-    followers = user.followed.all()
+    
+    # Get the followed users (users being followed by the current user)
+    followed_users = Follow.query.filter_by(follower_id=user.id).join(User, Follow.followed_id == User.id).all()
+
+    # Get the followers (users following the current user)
+    followers = Follow.query.filter_by(followed_id=user.id).join(User, Follow.follower_id == User.id).all()
 
     # Retrieve a list of users that the current user does not follow but has a connection with
-    suggested_users = User.query.filter(User.id != user.id, ~user.followers.filter_by(follower_id=User.id).exists()).all()
+    suggested_users = User.query.filter(User.id != user.id, ~user.followers.filter_by(followed_id=User.id).exists()).all()
 
     return render_template('user_relations.html', user=user, followed_users=followed_users, followers=followers, suggested_users=suggested_users)
+
 
 # Notifications
 @app.route('/notifications')
 @login_required
 def notifications():
-    user_notifications = (
-    Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all())
-    return render_template('notifications.html', notifications=user_notifications)
+    # Mark all notifications as read when the user views the notifications page
+    user_notifications = Notification.query.filter_by(user_id=current_user.id).all()
+    for notification in user_notifications:
+        notification.read = True
 
+    db.session.commit()
+
+    # Fetch and display notifications
+    user_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    return render_template('notifications.html', notifications=user_notifications)
 
 # Settings
 @app.route('/user/settings', methods=['GET'])
@@ -836,7 +944,69 @@ def privacy_settings():
         return redirect(url_for('privacy_settings'))
     return render_template('privacy_settings.html', user=current_user)
 
+# Request Password reset
+@app.route('/request_reset_password', methods=['GET', 'POST'])
+def request_reset_password():
+    form = RequestPasswordResetForm()
+
+    if form.validate_on_submit():
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            # Generate and store reset token
+            user.generate_reset_token()
+            db.session.commit()
+
+            # Send email to user with reset link
+            send_reset_email(user.email, user.reset_token)
+
+            flash('Password reset email sent. Check your inbox.', 'success')
+            return redirect(url_for('see_email'))
+        else:
+            flash('User not found with the provided email.', 'error')
+
+    return render_template('request_reset_password.html', form=form)
+
+
+
+# Reset password
+@app.route('/reset_password/<string:token>', methods=['GET', 'POST'])
+def reset_password(token):
+    user = User.query.filter_by(reset_token=token).first()
+
+    if not user:
+        abort(404)  # Token not found
+
+    form = PasswordResetForm()
+
+    if form.validate_on_submit():
+        # Ensure the provided email matches the user's registered email
+        if form.email.data != user.email:
+            flash('Invalid email for password reset.', 'error')
+            return redirect(url_for('login'))
+
+        # Ensure the new password matches the confirmation
+        if form.new_password.data != form.confirm_password.data:
+            flash('New password and confirmation do not match.', 'error')
+            return redirect(request.url)
+
+        # Update the password and clear the reset_token
+        user.set_password(form.new_password.data)
+        user.reset_token = None
+        db.session.commit()
+
+        flash('Password reset successfully! Please log in with your new password.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', form=form)
+
+
+# see email
+@app.route('/see_email')
+def see_email():
+    return render_template('see_email.html')
 
 # Run app
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)

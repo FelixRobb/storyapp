@@ -134,15 +134,10 @@
             color: #ffffff;
         }
 
-        .linkss {
-            width: 30px;
-            height: 30px;
-        }
-
         .icon {
             height: 30px;
             width: 30px;
-
+            align-self: center;
         }
 
         .buttpro {
@@ -150,8 +145,17 @@
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: nowrap;
         }
 
+        .link-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 10px;
+        }
         .linkli {
             display: flex;
             flex-direction: row;
@@ -374,11 +378,13 @@
                 <div class="buttpro">
                     <a class="edit-profile-button" href="{{ url_for('edit_profile', user_id=user.id) }}">Edit
                         Profile</a>
-                        
-                    <div style="width: 120px; display: flex; flex-direction: row; justify-content: space-between;">
-                    <a class="linkss" href="{{ url_for('search_saved_stories') }}">Saved Stories</a>
-                    <a class="linkss" href="{{ url_for('user_settings') }}"><img class="icon"
-                            src="{{ url_for('static', filename='icons/settings.png') }}" alt="settings"></a>
+
+                    <div class="link-group">
+                        <a class="edit-profile-button" href="{{ url_for('saved_stories') }}">Saved Stories</a>
+                        <div class="settings-icon">
+                            <a class="linkss" href="{{ url_for('user_settings') }}"><img class="icon"
+                                    src="{{ url_for('static', filename='icons/settings.png') }}" alt="settings"></a>
+                        </div>
                     </div>
                 </div>
             </div>

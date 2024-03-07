@@ -545,14 +545,40 @@ def view_story(story_id):
 
 
 # Saved stories
-@app.route('/search_saved_stories', methods=['GET', 'POST'])
+@app.route('/saved_stories')
 @login_required
-def search_saved_stories():
-    search_query = request.form.get('search_query', '')
-    saved_stories = current_user.saved_stories.filter(Story.title.ilike(f"%{search_query}%")).all()
+def saved_stories():
+    search_query = request.args.get('search', default='', type=str)
+    
+    # Filter saved stories based on the search query
+    saved_stories = SavedStory.query.filter(
+    (SavedStory.user_id == current_user.id) &
+    SavedStory.story.has(Story.title.ilike(f"%{search_query}%"))
+).all()
+
+
     return render_template('saved_stories.html', saved_stories=saved_stories)
 
-# edit story
+
+# Search saved stories
+@app.route('/search_saved_stories', methods=['GET'])
+@login_required
+def search_saved_stories():
+    search_query = request.args.get('query', '').strip()
+
+    if search_query:
+        saved_stories = SavedStory.query.join(Story).filter(
+            SavedStory.user_id == current_user.id,
+            Story.title.ilike(f"%{search_query}%")
+        ).all()
+
+        search_results = [{'title': story.story.title, 'url': url_for('view_story', story_id=story.story.id)} for story in saved_stories]
+        return jsonify(search_results)
+
+    return jsonify([])
+
+
+# Edit story
 @app.route('/story/edit/<int:story_id>', methods=['GET', 'POST'])
 @login_required
 def edit_story(story_id):

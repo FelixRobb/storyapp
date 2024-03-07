@@ -92,16 +92,6 @@
             text-decoration: none;
         }
 
-        button {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: inline-block;
-            /* Set the display property to inline-block */
-        }
 
         input {
             width: calc(100% /1.8);
@@ -156,38 +146,49 @@
             font-size: 14px;
         }
 
-        @media only screen and (min-width: 800px) {
+        .savedbar {
+            display: flex;
+            justify-content: space-between;
+        }
 
-            .create {
-                flex-basis: calc(200% - 10px);
-                box-sizing: border-box;
-                text-align: center;
-                overflow-wrap: break-word;
-                color: #c2c2c2;
-                background-color: #2c2c2c;
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            /* Set the display property to inline-block */
+        }
+
+        .search-form {
+                width: 50%;
+                height: 35px;
+                background-color: #2b2b2b;
                 border-radius: 22px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                align-items: center;
+                justify-content: center;
                 font-size: 16px;
-                text-decoration: none;
-                padding: 12px;
-                margin: 5px;
+                text-align: center;
+                padding: 5px;
                 box-shadow: 0 0 4px #aba4a4;
             }
 
-            #createbot {
-                display: none;
+            .searchResultsContainer {
+                border: #2b2b2b 1px solid;
+                border-radius: 20px;
             }
 
-            .search-form2 {
-                display: none;
-            }
+        @media only screen and (min-width: 800px) {
+
 
             .plink {
                 display: none;
             }
 
-            .pbar {
-                display: none;
-            }
+            
 
             .linksn {
                 display: none;
@@ -211,25 +212,6 @@
         }
 
         @media only screen and (max-width: 800px) {
-
-            .create {
-                display: none;
-            }
-
-            #createbot {
-                position: fixed;
-                text-align: center;
-                color: #c2c2c2;
-                background-color: #4c4c4c;
-                border-radius: 22px;
-                font-size: 16px;
-                text-decoration: none;
-                padding: 12px;
-                margin: 5px;
-                bottom: 30px;
-                right: 30px;
-                box-shadow: 0 0 7px #00ff00;
-            }
 
             .linkli {
                 display: flex;
@@ -263,9 +245,7 @@
                 display: none;
             }
 
-            .pbar {
-                display: none;
-            }
+
 
             .linksn {
                 display: none;
@@ -352,41 +332,6 @@
                 width: 30px;
 
             }
-
-            input {
-                display: inline-flex;
-            }
-
-            .create {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-            }
-
-            #createbot {
-                display: none;
-            }
-
-            .pbar {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .search-form2 {
-                width: 50%;
-                height: 35px;
-                background-color: #2b2b2b;
-                border-radius: 22px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                align-items: center;
-                justify-content: center;
-                font-size: 16px;
-                text-align: center;
-                padding: 5px;
-                box-shadow: 0 0 4px #aba4a4;
-            }
-
         }
     </style>
 </head>
@@ -420,29 +365,67 @@
             <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
                         src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
         </div>
-        <div class="pbar">
+        <div class="savedbar">
             <h2>Saved Stories</h2>
-            <div class="search-form2">
-                <form action="{{ url_for('search_saved_stories') }}" method="POST">
-                    <input type="text" name="search_query" placeholder="Search saved stories...">
-                    <button style="display: inline; border-radius: 50px;" type="submit">Search</button>
-                </form>
+            <div class="search-form">
+                <input type="text" name="search_query" id="searchQuery" placeholder="Search saved stories...">
+                <button style="display: inline; border-radius: 50px;" onclick="handleSearch()">Search</button>
             </div>
         </div>
+
+        <div id="searchResultsContainer"></div>
+
+        <div id="savedStoriesContainer">
+
         <ul class="story">
             {% for story in saved_stories %}
-            <a id="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
+            <a class="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
                 <li class="story-box">
-                    <div class="author">{{ story.author.username }}</div>
-                    <h3>{{ story.title }}</h3>
-                    <p class="synopsis">{{ story.synopsis[:200] }}</p>
-                    <div class="content-preview" style="overflow: hidden;">{{ story.content[:100]|safe }}...</div>
-                    <p class="tags">Tags: {{ story.tags }}</p>
+                    <div class="author">{{ story.story.author.username }}</div>
+                    <h3>{{ story.story.title }}</h3>
+                    <p class="synopsis">{{ story.story.synopsis[:200] }}</p>
+                    <div class="content-preview" style="overflow: hidden;">{{ story.story.content[:100]|safe }}...</div>
+                    <p class="tags">Tags: {{ story.story.tags }}</p>
                 </li>
             </a>
             {% endfor %}
         </ul>
+
+    </div>
     </main>
+    <script>
+        function handleSearch() {
+    const searchQuery = document.getElementById('searchQuery').value;
+
+    fetch(`/search_saved_stories?query=${searchQuery}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        credentials: 'same-origin',
+    })
+    .then(response => response.json())
+    .then(data => {
+        const searchResultsContainer = document.getElementById('searchResultsContainer');
+        searchResultsContainer.innerHTML = ''; // Clear previous results
+
+        if (data.length > 0) {
+            data.forEach(story => {
+                const resultItem = document.createElement('div');
+                resultItem.innerHTML = `<a href="${story.url}">${story.title}</a>`;
+                searchResultsContainer.appendChild(resultItem);
+            });
+        } else {
+            searchResultsContainer.innerHTML = 'No results found.';
+        }
+    })
+    .catch(error => {
+        console.error('Error searching stories:', error);
+    });
+}
+
+    </script>
 </body>
 
 </html>
