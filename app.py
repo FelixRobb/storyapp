@@ -60,10 +60,12 @@ def add_cache_control(response):
     response.headers['Expires'] = '0'
     return response
 
-def generate_etag(content):
-    hash_object = hashlib.md5(content)
-    etag = hash_object.hexdigest()
-    return etag
+# Get the path to the tags.txt file in the static folder
+tags_file_path = os.path.join(app.root_path, 'static', 'tags.txt')
+
+# Read pre-established tags from the tags.txt file
+with open(tags_file_path, 'r') as file:
+    preestablished_tags = [line.strip() for line in file]
 
 # image functions
 def allowed_file(filename):
@@ -525,6 +527,12 @@ def create_story():
         return redirect(url_for('view_story', story_id=new_story.id))
 
     return render_template('create_story.html', form=form)
+
+
+# Route to fetch the pre-established tags
+@app.route('/get_tags', methods=['GET'])
+def get_tags():
+    return jsonify(tags=preestablished_tags)
 
 
 # View story
