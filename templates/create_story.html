@@ -121,30 +121,31 @@
         }
 
 
-         /* Container for the autocomplete suggestions */
-    #ui-id-1 {
-        position: absolute;
-        max-height: 35px;
-        overflow-y: hidden;
-        border: 1px solid #6a6a6a;
-        border-radius: 0px 0px 12px 12px;
-        background-color: #303030;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        z-index: 1000; /* Ensure it appears above other elements */
-    }
+        /* Container for the autocomplete suggestions */
+        #ui-id-1 {
+            position: absolute;
+            max-height: 35px;
+            overflow-y: hidden;
+            border: 1px solid #6a6a6a;
+            border-radius: 0px 0px 12px 12px;
+            background-color: #303030;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            /* Ensure it appears above other elements */
+        }
 
-    /* Individual suggestion items */
-    .ui-menu-item {
-        padding: 8px;
-        cursor: pointer;
-    }
+        /* Individual suggestion items */
+        .ui-menu-item {
+            padding: 8px;
+            cursor: pointer;
+        }
 
-    /* Highlight the selected suggestion */
-    .custom-autocomplete-item.ui-state-focus,
-    .custom-autocomplete-item.ui-state-active {
-        background-color: #838383;
-        color: #fff;
-    }
+        /* Highlight the selected suggestion */
+        .custom-autocomplete-item.ui-state-focus,
+        .custom-autocomplete-item.ui-state-active {
+            background-color: #838383;
+            color: #fff;
+        }
 
         @media only screen and (max-width: 700px) {
 
@@ -270,42 +271,78 @@
         });
     </script>
 
-    <script>
-        // Function to fetch pre-established tags
-        function fetchTags() {
-            // Replace this with your server endpoint to fetch tags
-            var endpoint = "/get_tags";
 
-            $.ajax({
-                url: endpoint,
-                type: "GET",
-                success: function (data) {
-                    // Call function to initialize tag autocomplete
-                    initializeTagAutocomplete(data.tags);
-                },
-                error: function (error) {
-                    console.error("Error fetching tags:", error);
-                }
-            });
+    <script>
+        // Fetch tags from the server and populate the datalist
+        function fetchTags() {
+            fetch('/get_tags')
+                .then(response => response.json())
+                .then(data => {
+                    const tags = data.tags;
+
+                    // Populate the datalist with fetched tags
+                    const tagList = document.getElementById('tagList');
+                    tags.forEach(tag => {
+                        const option = document.createElement('option');
+                        option.value = tag;
+                        tagList.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching tags:', error));
+        }
+
+        // Function to check if a tag starts with '#'
+        function isValidTag(tag) {
+            return tag.trim().startsWith('#');
         }
 
         // Function to initialize tag autocomplete
-        function initializeTagAutocomplete(tags) {
-            $("#tags").autocomplete({
-                source: tags,
-                appendTo: "#tags-container",  // Replace with the ID or class of the container element
-                position: { my: "left top", at: "left bottom" }  // Adjust position as needed
-            }).data("ui-autocomplete")._renderItem = function (ul, item) {
-            // Customize the rendering of each suggestion item
-                return $("<li>")
-                    .append("<div class='custom-autocomplete-item'>" + item.label + "</div>")
-                    .appendTo(ul);
-            };
+        function initializeTagAutocomplete() {
+            const tagsInput = document.getElementById('tags');
+            const tagList = document.getElementById('tagList');
+
+            // Variable to store the previous value of the input field
+            let prevValue = tagsInput.value;
+
+            tagsInput.addEventListener('input', () => {
+                const enteredTags = tagsInput.value.split(',').map(tag => tag.trim());
+
+                // Clear the datalist options
+                while (tagList.firstChild) {
+                    tagList.removeChild(tagList.firstChild);
+                }
+
+                // Add valid tags to the datalist
+                enteredTags.forEach(tag => {
+                    if (tag.startsWith('#')) {
+                        const option = document.createElement('option');
+                        option.value = tag;
+                        tagList.appendChild(option);
+                    }
+                });
+
+                // If the input starts with '#', show autocomplete
+                if (tagsInput.value.includes('#')) {
+                    tagsInput.setAttribute('list', 'tag-list');
+                } else {
+                    tagsInput.removeAttribute('list');
+                }
+
+                // If there's a space after the last character, remove autocomplete
+                if (tagsInput.value.trim().slice(-1) === ' ' && !tagsInput.value.startsWith('#')) {
+                    tagsInput.removeAttribute('list');
+                    tagsInput.removeAttribute('list');
+                }
+
+                // Update the previous value
+                prevValue = tagsInput.value;
+            });
         }
 
         // Fetch tags when the document is ready
-        $(document).ready(function () {
+        document.addEventListener('DOMContentLoaded', () => {
             fetchTags();
+            initializeTagAutocomplete();
         });
     </script>
 
@@ -352,7 +389,7 @@
 
                 <label for="synopsis">Synopsis:</label>
                 <textarea style="max-height: 30px;" type="text" id="synopsis" name="synopsis"
-                    placeholder="Idealy 200 characters" required></textarea>
+                    placeholder="Ideally 200 characters" required></textarea>
 
                 <div id="chapter-list" class="chapter-list"></div>
 
@@ -361,13 +398,16 @@
                     required></textarea>
 
                 <label for="tags">Tags:</label>
-                <!-- Add the autocomplete attribute to enable autocomplete -->
-                <input type="text" id="tags" name="tags" autocomplete="on">
+                <input type="text" id="tags" name="tags" list="tagList" placeholder="Add tags starting with '#'">
+
+                <!-- Datalist for tag autocomplete -->
+                <datalist id="tagList"></datalist>
 
                 <button type="submit">Create Story</button>
 
             </form>
         </div>
+
     </main>
 </body>
 <script>

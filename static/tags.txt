@@ -1,80 +1,76 @@
-Action
-Adventure
-Comedy
-Drama
-Fantasy
-Historical
-Horror
-Mystery
-Romance
-Science Fiction
-Thriller
-Crime
-Suspense
-Supernatural
-Slice of Life
-Cyberpunk
-Dystopian
-Post-Apocalyptic
-Steampunk
-Noir
-Western
-Urban
-Magical Realism
-Alternate History
-War
-Espionage
-Family
-Friendship
-Coming of Age
-Tragedy
-Satire
-Psychological
-Political
-Espionage
-Mythology
-Superhero
-Time Travel
-Parallel Universe
-Virtual Reality
-Space Opera
-Military
-Sports
-Survival
-Environmental
-Medical
-Technological
-AI (Artificial Intelligence)
-Cybernetics
-Genetic Engineering
-Exploration
-Alien Invasion
-Mythical Creatures
-Dragons
-Vampires
-Werewolves
-Zombies
-Pirates
-Ninjas
-Robots
-Androids
-Pirates
-Ninjas
-Samurai
-Martial Arts
-Time Loop
-Apocalypse
-Parallel Worlds
-Quest
-Comedy of Errors
-Noir
-Conspiracy
-Bounty Hunter
-Historical Romance
-Historical Fiction
-Futuristic
-Folklore
-Fairy Tale
-Mythical Realism
-Cyber Warfare
-Techno-Thriller
+#Action
+#Adventure
+#Comedy
+#Drama
+#Fantasy
+#Historical
+#Horror
+#Mystery
+#Romance
+#ScienceFiction
+#Thriller
+#Crime
+#Suspense
+#Supernatural
+#SliceOfLife
+#Cyberpunk
+#Dystopian
+#PostApocalyptic
+#Steampunk
+#Noir
+#Western
+#Urban
+#MagicalRealism
+#AlternateHistory
+#War
+#Espionage
+#Family
+#Friendship
+#ComingOfAge
+#Tragedy
+#Satire
+#Psychological
+#Political
+#Mythology
+#Superhero
+#TimeTravel
+#ParallelUniverse
+#VirtualReality
+#SpaceOpera
+#Military
+#Sports
+#Survival
+#Environmental
+#Medical
+#Technological
+#AI
+#Cybernetics
+#GeneticEngineering
+#Exploration
+#AlienInvasion
+#MythicalCreatures
+#Dragons
+#Vampires
+#Werewolves
+#Zombies
+#Pirates
+#Ninjas
+#Robots
+#Androids
+#Samurai
+#MartialArts
+#TimeLoop
+#Apocalypse
+#ParallelWorlds
+#Quest
+#ComedyOfErrors
+#Conspiracy
+#BountyHunter
+#HistoricalRomance
+#HistoricalFiction
+#Futuristic
+#Folklore
+#FairyTale
+#MythicalRealism
+#CyberWarfare
+#TechnoThriller
