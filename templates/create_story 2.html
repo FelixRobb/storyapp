@@ -147,42 +147,6 @@
             color: #fff;
         }
 
-
-        .modal {
-            display: none;
-            position: fixed;
-            width: 80%;
-            max-width: 600px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-content {
-            background-color: #303030;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            border-radius: 20px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
         @media only screen and (max-width: 700px) {
 
             .linkli {
@@ -308,6 +272,80 @@
     </script>
 
 
+    <script>
+        // Fetch tags from the server and populate the datalist
+        function fetchTags() {
+            fetch('/get_tags')
+                .then(response => response.json())
+                .then(data => {
+                    const tags = data.tags;
+
+                    // Populate the datalist with fetched tags
+                    const tagList = document.getElementById('tagList');
+                    tags.forEach(tag => {
+                        const option = document.createElement('option');
+                        option.value = tag;
+                        tagList.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching tags:', error));
+        }
+
+        // Function to check if a tag starts with '#'
+        function isValidTag(tag) {
+            return tag.trim().startsWith('#');
+        }
+
+        // Function to initialize tag autocomplete
+        function initializeTagAutocomplete() {
+            const tagsInput = document.getElementById('tags');
+            const tagList = document.getElementById('tagList');
+
+            // Variable to store the previous value of the input field
+            let prevValue = tagsInput.value;
+
+            tagsInput.addEventListener('input', () => {
+                const enteredTags = tagsInput.value.split(',').map(tag => tag.trim());
+
+                // Clear the datalist options
+                while (tagList.firstChild) {
+                    tagList.removeChild(tagList.firstChild);
+                }
+
+                // Add valid tags to the datalist
+                enteredTags.forEach(tag => {
+                    if (tag.startsWith('#')) {
+                        const option = document.createElement('option');
+                        option.value = tag;
+                        tagList.appendChild(option);
+                    }
+                });
+
+                // If the input starts with '#', show autocomplete
+                if (tagsInput.value.includes('#')) {
+                    tagsInput.setAttribute('list', 'tag-list');
+                } else {
+                    tagsInput.removeAttribute('list');
+                }
+
+                // If there's a space after the last character, remove autocomplete
+                if (tagsInput.value.trim().slice(-1) === ' ' && !tagsInput.value.startsWith('#')) {
+                    tagsInput.removeAttribute('list');
+                    tagsInput.removeAttribute('list');
+                }
+
+                // Update the previous value
+                prevValue = tagsInput.value;
+            });
+        }
+
+        // Fetch tags when the document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchTags();
+            initializeTagAutocomplete();
+        });
+    </script>
+
 </head>
 
 <body>
@@ -360,105 +398,22 @@
                     required></textarea>
 
                 <label for="tags">Tags:</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <button style="width: 100px;" onclick="openModal()">Add Tag</button>
-                    <input type="text" id="tags" name="tags">
-                </div>
+                <input type="text" id="tags" name="tags" list="tagList" placeholder="Add tags starting with '#'">
 
+                <!-- Datalist for tag autocomplete -->
+                <datalist id="tagList"></datalist>
 
                 <button type="submit">Create Story</button>
 
             </form>
-
-            <div id="myModal" class="modal">
-                <div class="modal-content">
-                    <span onclick="closeModal()" class="close">&times;</span>
-                    <form id="tagForm">
-                        <label for="tagInput">Enter Tag:</label>
-                        <input type="text" id="tagInput" name="tagInput" placeholder="Enter tag starting with #"
-                            required list="tagList">
-                        <button type="submit">Submit</button>
-                    </form>
-                    <datalist id="tagList"></datalist>
-                </div>
-            </div>
+        </div>
 
     </main>
-
-    <script>
-        // Function to handle the modal popup
-        function openModal() {
-            const modal = document.getElementById('myModal');
-            const tagInput = document.getElementById('tagInput');
-            const tagList = document.getElementById('tagList');
-
-            modal.style.display = 'block';
-            tagList.innerHTML = ''; // Clear previous options
-
-            // Fetch tags from the server and populate the datalist
-            fetchTags();
-
-            // Focus on the input field when the modal opens
-            requestAnimationFrame(() => {
-                tagInput.focus();
-            });
-
-
-            // Handle form submission
-            const tagForm = document.getElementById('tagForm');
-            const submitHandler = function (event) {
-                event.preventDefault();
-                const tag = tagInput.value.trim();
-                if (tag && tag.startsWith('#')) {
-                    addTag(tag);
-                    tagInput.value = '';
-                    modal.style.display = 'none';
-                    // Remove event listener to prevent multiple submissions
-                    tagForm.removeEventListener('submit', submitHandler);
-                } else {
-                    alert('Tag should start with #');
-                    tagInput.value = ''; // Clear the input field
-                    tagInput.focus(); // Set the focus back on the input field
-                }
-            };
-            tagForm.addEventListener('submit', submitHandler);
-        }
-        
-
-        // Function to close the modal
-        function closeModal() {
-            const modal = document.getElementById('myModal');
-            modal.style.display = 'none';
-        }
-
-        // Function to fetch tags from the server and populate the datalist
-        function fetchTags() {
-            fetch('/get_tags')
-                .then(response => response.json())
-                .then(data => {
-                    const tags = data.tags;
-                    const tagList = document.getElementById('tagList');
-                    tags.forEach(tag => {
-                        const option = document.createElement('option');
-                        option.value = tag;
-                        tagList.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching tags:', error));
-        }
-
-        // Function to add a tag to the tag field
-        function addTag(tag) {
-            const tagsInput = document.getElementById('tags');
-            const currentTags = tagsInput.value.trim();
-            if (currentTags === '') {
-                tagsInput.value = tag;
-            } else {
-                tagsInput.value = currentTags + ', ' + tag;
-            }
-        }
-    </script>
-
 </body>
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
 
 </html>

@@ -2,7 +2,6 @@
 
 
 import os
-import re
 import string
 import random
 import hashlib 
@@ -12,6 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_argon2 import Argon2
 from flask_migrate import Migrate
 from sqlalchemy import func, or_
+from sqlalchemy.orm import aliased
 from datetime import datetime, timezone
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, FileField, validators, PasswordField, BooleanField, SelectField
@@ -60,10 +60,12 @@ def add_cache_control(response):
     response.headers['Expires'] = '0'
     return response
 
-def generate_etag(content):
-    hash_object = hashlib.md5(content)
-    etag = hash_object.hexdigest()
-    return etag
+# Get the path to the tags.txt file in the static folder
+tags_file_path = os.path.join(app.root_path, 'static', 'tags.txt')
+
+# Read pre-established tags from the tags.txt file
+with open(tags_file_path, 'r') as file:
+    preestablished_tags = [line.strip() for line in file]
 
 # image functions
 def allowed_file(filename):
@@ -94,6 +96,7 @@ class User(db.Model, UserMixin):
     language = db.Column(db.String(10), default='en')  # Example: 'en' for English
     bio = db.Column(db.String(255))
     stories = db.relationship('Story', back_populates='author', lazy=True)
+    saved_stories = db.relationship('SavedStory', backref='user', lazy=True)
     comments = db.relationship('Comment', backref='author', lazy=True)
     followers = db.relationship('Follow', foreign_keys='Follow.followed_id', backref='followed', lazy='dynamic')
     followed = db.relationship('Follow', foreign_keys='Follow.follower_id', backref='follower', lazy='dynamic')
@@ -160,7 +163,16 @@ class Story(db.Model):
     author = db.relationship('User', back_populates='stories')
     versions = db.relationship('Version', back_populates='story', foreign_keys="[Version.story_id]")
     comments = db.relationship('Comment', back_populates='story', lazy=True)
+    saved_by_users = db.relationship('SavedStory', backref='story', lazy=True)
     edit_proposals = db.relationship('EditProposal', back_populates='story', lazy=True)
+
+
+# Saved story class
+class SavedStory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    story_id = db.Column(db.Integer, db.ForeignKey('story.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 # Comment class
@@ -387,8 +399,6 @@ def register():
 
 
 
-# index/Feed
-# ...
 
 # index/Feed
 @app.route('/', methods=['GET', 'POST'])
@@ -401,15 +411,16 @@ def index():
                 return redirect(url_for('search_results', query=search_query))
             else:
                 # Fetch all stories if no search query is provided
+                saved_stories_alias = aliased(SavedStory)
                 subquery = db.session.query(
-                    Version.story_id,
-                    func.max(Version.date).label('max_date')
-                ).group_by(Version.story_id).subquery()
+                    saved_stories_alias.story_id,
+                    func.max(saved_stories_alias.date).label('max_date')
+                ).filter(saved_stories_alias.user_id == current_user.id).group_by(saved_stories_alias.story_id).subquery()
 
                 stories = (
                     Story.query
-                    .join(subquery, Story.id == subquery.c.story_id)
-                    .order_by(subquery.c.max_date.desc())
+                    .join(subquery, Story.id == subquery.c.story_id, isouter=True)
+                    .order_by(subquery.c.max_date.desc().nullslast())
                     .all()
                 )
 
@@ -417,15 +428,16 @@ def index():
                 return render_template('feed.html', stories=stories, unread_notifications=unread_notifications)
         else:
             # Your existing code for fetching stories without search
+            saved_stories_alias = aliased(SavedStory)
             subquery = db.session.query(
-                Version.story_id,
-                func.max(Version.date).label('max_date')
-            ).group_by(Version.story_id).subquery()
+                saved_stories_alias.story_id,
+                func.max(saved_stories_alias.timestamp).label('max_date')
+            ).filter(saved_stories_alias.user_id == current_user.id).group_by(saved_stories_alias.story_id).subquery()
 
             stories = (
                 Story.query
-                .join(subquery, Story.id == subquery.c.story_id)
-                .order_by(subquery.c.max_date.desc())
+                .join(subquery, Story.id == subquery.c.story_id, isouter=True)
+                .order_by(subquery.c.max_date.desc().nullslast())
                 .all()
             )
 
@@ -434,7 +446,6 @@ def index():
             return render_template('feed.html', stories=stories, unread_notifications=unread_notifications)
     else:
         return redirect(url_for('entry_page'))
-
 
 # Search results
 @app.route('/search_results', methods=['GET', 'POST'])
@@ -455,6 +466,28 @@ def search_results():
 
     return render_template('search_results.html', query=None, story_results=None, user_results=None)
 
+
+@app.route('/story/<int:story_id>/save', methods=['POST'])
+@login_required
+def save_story(story_id):
+    story = Story.query.get(story_id)
+
+    if not story:
+        return jsonify({'error': 'Story not found'}), 404
+
+    saved_story = SavedStory.query.filter_by(user_id=current_user.id, story_id=story_id).first()
+
+    if saved_story:
+        # Story is already saved, so unsave it
+        db.session.delete(saved_story)
+        db.session.commit()
+        return jsonify({'status': 'unsaved'})
+    else:
+        # Story is not saved, so save it
+        new_saved_story = SavedStory(user_id=current_user.id, story_id=story_id)
+        db.session.add(new_saved_story)
+        db.session.commit()
+        return jsonify({'status': 'saved'})
 
 # Create story
 @app.route('/create_story', methods=['GET', 'POST'])
@@ -496,6 +529,12 @@ def create_story():
     return render_template('create_story.html', form=form)
 
 
+# Route to fetch the pre-established tags
+@app.route('/get_tags', methods=['GET'])
+def get_tags():
+    return jsonify(tags=preestablished_tags)
+
+
 # View story
 @app.route('/story/<int:story_id>')
 @login_required
@@ -513,7 +552,41 @@ def view_story(story_id):
         return "Story not found", 404
 
 
-# edit story
+# Saved stories
+@app.route('/saved_stories')
+@login_required
+def saved_stories():
+    search_query = request.args.get('search', default='', type=str)
+    
+    # Filter saved stories based on the search query
+    saved_stories = SavedStory.query.filter(
+    (SavedStory.user_id == current_user.id) &
+    SavedStory.story.has(Story.title.ilike(f"%{search_query}%"))
+).all()
+
+
+    return render_template('saved_stories.html', saved_stories=saved_stories)
+
+
+# Search saved stories
+@app.route('/search_saved_stories', methods=['GET'])
+@login_required
+def search_saved_stories():
+    search_query = request.args.get('query', '').strip()
+
+    if search_query:
+        saved_stories = SavedStory.query.join(Story).filter(
+            SavedStory.user_id == current_user.id,
+            Story.title.ilike(f"%{search_query}%")
+        ).all()
+
+        search_results = [{'title': story.story.title, 'url': url_for('view_story', story_id=story.story.id)} for story in saved_stories]
+        return jsonify(search_results)
+
+    return jsonify([])
+
+
+# Edit story
 @app.route('/story/edit/<int:story_id>', methods=['GET', 'POST'])
 @login_required
 def edit_story(story_id):

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feed</title>
+    <title>Saved Stories</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <style>
         body {
@@ -35,7 +35,6 @@
         }
 
         .story-box {
-            position: relative;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
@@ -78,7 +77,6 @@
             border-radius: 4px;
             cursor: pointer;
             display: inline-block;
-            /* Set the display property to inline-block */
         }
 
         button:hover {
@@ -89,25 +87,9 @@
             color: #8c8c8c;
         }
 
-
         .story-box {
             display: block;
             text-decoration: none;
-            position: relative;
-        }
-
-
-        .search-form {
-            height: 35px;
-            background-color: #2b2b2b;
-            border-radius: 22px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            text-align: center;
-            padding: 5px;
-            box-shadow: 0 0 4px #aba4a4;
         }
 
 
@@ -119,25 +101,6 @@
             border-radius: 40px;
             color: #fff;
             padding: 5px;
-        }
-
-        .savestr {
-            position: absolute;
-            background: none;
-            top: 5px;
-            /* Adjust the top position as needed */
-            right: 5px;
-            /* Adjust the right position as needed */
-            padding: 3px;
-        }
-
-        .savestr:hover {
-            background: #5e5e5e;
-        }
-
-        .iconsave {
-            width: 30px;
-            height: 30px;
         }
 
         a {
@@ -183,38 +146,49 @@
             font-size: 14px;
         }
 
-        @media only screen and (min-width: 800px) {
+        .savedbar {
+            display: flex;
+            justify-content: space-between;
+        }
 
-            .create {
-                flex-basis: calc(200% - 10px);
-                box-sizing: border-box;
-                text-align: center;
-                overflow-wrap: break-word;
-                color: #c2c2c2;
-                background-color: #2c2c2c;
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            /* Set the display property to inline-block */
+        }
+
+        .search-form {
+                width: 50%;
+                height: 35px;
+                background-color: #2b2b2b;
                 border-radius: 22px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                align-items: center;
+                justify-content: center;
                 font-size: 16px;
-                text-decoration: none;
-                padding: 12px;
-                margin: 5px;
+                text-align: center;
+                padding: 5px;
                 box-shadow: 0 0 4px #aba4a4;
             }
 
-            #createbot {
-                display: none;
+            .searchResultsContainer {
+                border: #2b2b2b 1px solid;
+                border-radius: 20px;
             }
 
-            .search-form2 {
-                display: none;
-            }
+        @media only screen and (min-width: 800px) {
+
 
             .plink {
                 display: none;
             }
 
-            .pbar {
-                display: none;
-            }
+            
 
             .linksn {
                 display: none;
@@ -238,25 +212,6 @@
         }
 
         @media only screen and (max-width: 800px) {
-
-            .create {
-                display: none;
-            }
-
-            #createbot {
-                position: fixed;
-                text-align: center;
-                color: #c2c2c2;
-                background-color: #4c4c4c;
-                border-radius: 22px;
-                font-size: 16px;
-                text-decoration: none;
-                padding: 12px;
-                margin: 5px;
-                bottom: 30px;
-                right: 30px;
-                box-shadow: 0 0 7px #00ff00;
-            }
 
             .linkli {
                 display: flex;
@@ -290,9 +245,7 @@
                 display: none;
             }
 
-            .pbar {
-                display: none;
-            }
+
 
             .linksn {
                 display: none;
@@ -331,7 +284,6 @@
             align-items: center;
             justify-content: center;
         }
-
 
         @media only screen and (max-width: 663px) {
             .linksp {
@@ -380,40 +332,6 @@
                 width: 30px;
 
             }
-
-            input {
-                display: inline-flex;
-            }
-
-            .create {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-            }
-
-            #createbot {
-                display: none;
-            }
-
-            .pbar {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .search-form2 {
-                height: 35px;
-                background-color: #2b2b2b;
-                border-radius: 22px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                align-items: center;
-                justify-content: center;
-                font-size: 16px;
-                text-align: center;
-                padding: 5px;
-                box-shadow: 0 0 4px #aba4a4;
-            }
-
         }
     </style>
 </head>
@@ -426,38 +344,17 @@
         </div>
         <div>
             <ul class="linkli">
-
-                <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My
-                        Page</a></li>
-                <li><a class="create" href="{{ url_for('create_story', story_id=-1) }}">Create
+                <li><a class="links" href="{{ url_for('index') }}">Feed</a></li>
+                <li><a class="links" href="{{ url_for('create_story', story_id=-1) }}">Create
                         Story</a></li>
                 <li><a class="links" href="{{ url_for('user_relations') }}">User
                         Relations</a></li>
-                <li><a class="linksp" href="{{ url_for('notifications') }}">Notifications</a></li>
-                <li>
-                    <div class="search-form">
-                        <form method="post" action="{{ url_for('search_results', query=search_query) }}">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="text" id="search_query" name="search_query" placeholder="Search..." required>
-                            <button style="display: inline; border-radius: 50px;" type="submit">search</button>
-                        </form>
-                    </div>
-                </li>
-                <li>
-                    <a class="linksn" href="{{ url_for('notifications') }}">
-                        {% if unread_notifications %}
-                        <img class="icon" src="{{ url_for('static', filename='icons/newbell.png') }}" alt="Unread Icon">
-                        {% else %}
-                        <img class="icon" src="{{ url_for('static', filename='icons/bell.png') }}" alt="Read Icon">
-                        {% endif %}
-                    </a>
-                </li>
-
+                        <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My
+                            Page</a></li>
             </ul>
         </div>
     </header>
     <main>
-
         <div class="plink">
             <div class="plinks"><img class="icon" src="{{ url_for('static', filename='icons/onhome.png') }}"
                     alt="Example Icon"></a></div>
@@ -468,89 +365,64 @@
             <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
                         src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
         </div>
-
-
-        <div class="pbar">
-            <h2>Feed</h2>
-            <div class="search-form2" style="margin-left: 10px; margin-right: 10px;">
-                <form method="post" action="{{ url_for('search_results', query=search_query) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="text" id="search_query" name="search_query" placeholder="Search..." required>
-                    <button style="display: inline; border-radius: 50px;" type="submit">search</button>
-                </form>
+        <div class="savedbar">
+            <h2>Saved Stories</h2>
+            <div class="search-form">
+                <input type="text" name="search_query" id="searchQuery" placeholder="Search saved stories...">
+                <button style="display: inline; border-radius: 50px;" onclick="handleSearch()">Search</button>
             </div>
-            <a href="{{ url_for('notifications') }}">
-                {% if unread_notifications %}
-                <img class="icon" src="{{ url_for('static', filename='icons/newbell.png') }}" alt="Unread Icon">
-                {% else %}
-                <img class="icon" src="{{ url_for('static', filename='icons/bell.png') }}" alt="Read Icon">
-                {% endif %}
-
-            </a>
         </div>
 
+        <div id="searchResultsContainer"></div>
+
+        <div id="savedStoriesContainer">
 
         <ul class="story">
-            {% for story in stories %}
-            <li class="story-box">
-                <a id="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
-                    <div>
-                        <div class="author">{{ story.author.username }}</div>
-                        <h3>{{ story.title }}</h3>
-                        <p class="synopsis">{{ story.synopsis[:200] }}</p>
-                        <div class="content-preview" style="overflow: hidden;">{{ story.content[:100]|safe }}...</div>
-                        <p class="tags">Tags: {{ story.tags }}</p>
-                    </div>
-                </a>
-                <div class="save-button">
-                    <button class="savestr" onclick="saveStory({{ story.id }}, this)">
-                        {% if story.saved_by_users %}
-                            <img class="iconsave" src="{{ url_for('static', filename='icons/saved.png') }}" alt="story saved">
-                        {% else %}
-                            <img class="iconsave" src="{{ url_for('static', filename='icons/save.png') }}" alt="save story">
-                        {% endif %}
-                    </button>
-                </div>
-            </li>
+            {% for story in saved_stories %}
+            <a class="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
+                <li class="story-box">
+                    <div class="author">{{ story.story.author.username }}</div>
+                    <h3>{{ story.story.title }}</h3>
+                    <p class="synopsis">{{ story.story.synopsis[:200] }}</p>
+                    <div class="content-preview" style="overflow: hidden;">{{ story.story.content[:100]|safe }}...</div>
+                    <p class="tags">Tags: {{ story.story.tags }}</p>
+                </li>
+            </a>
             {% endfor %}
         </ul>
 
-
-        <li><a id="createbot" href="{{ url_for('create_story', story_id=-1) }}">Create
-                Story</a></li>
-
-
+    </div>
     </main>
     <script>
-        function saveStory(storyId, buttonElement) {
-    fetch(`/story/${storyId}/save`, {
-        method: 'POST',
+        function handleSearch() {
+    const searchQuery = document.getElementById('searchQuery').value;
+
+    fetch(`/search_saved_stories?query=${searchQuery}`, {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': '{{ csrf_token() }}'
         },
         credentials: 'same-origin',
-        body: JSON.stringify({}),
     })
-        .then(response => response.json())
-        .then(data => {
-            if ('status' in data) {
-                if (data.status === 'saved') {
-                    // Update button content to saved.png
-                    buttonElement.innerHTML = '<img class="iconsave" src="{{ url_for('static', filename='icons/saved.png') }}" alt="saved story">';
-                    console.log('Story saved successfully!');
-                } else if (data.status === 'unsaved') {
-                    // Update button content to unsaved.png or any default image
-                    buttonElement.innerHTML = '<img class="iconsave" src="{{ url_for('static', filename='icons/save.png') }}" alt="unsaved story">';
-                    console.log('Story unsaved successfully!');
-                }
-            } else {
-                console.error('Failed to save/unsave story.');
-            }
-        })
-        .catch(error => {
-            console.error('Error saving/unsaving story:', error);
-        });
+    .then(response => response.json())
+    .then(data => {
+        const searchResultsContainer = document.getElementById('searchResultsContainer');
+        searchResultsContainer.innerHTML = ''; // Clear previous results
+
+        if (data.length > 0) {
+            data.forEach(story => {
+                const resultItem = document.createElement('div');
+                resultItem.innerHTML = `<a href="${story.url}">${story.title}</a>`;
+                searchResultsContainer.appendChild(resultItem);
+            });
+        } else {
+            searchResultsContainer.innerHTML = 'No results found.';
+        }
+    })
+    .catch(error => {
+        console.error('Error searching stories:', error);
+    });
 }
 
     </script>
