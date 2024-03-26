@@ -151,12 +151,13 @@
         .modal {
             display: none;
             position: fixed;
-            top: 0px;
             width: 80%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0);
+            max-width: 600px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
         }
 
         .modal-content {
@@ -181,6 +182,7 @@
             text-decoration: none;
             cursor: pointer;
         }
+
         @media only screen and (max-width: 700px) {
 
             .linkli {
@@ -397,21 +399,36 @@
             fetchTags();
 
             // Focus on the input field when the modal opens
-            tagInput.focus();
+            requestAnimationFrame(() => {
+                tagInput.focus();
+            });
+
 
             // Handle form submission
             const tagForm = document.getElementById('tagForm');
-            tagForm.addEventListener('submit', function (event) {
+            const submitHandler = function (event) {
                 event.preventDefault();
                 const tag = tagInput.value.trim();
                 if (tag && tag.startsWith('#')) {
                     addTag(tag);
-                    modal.style.display = 'none';
                     tagInput.value = '';
+                    modal.style.display = 'none';
+                    // Remove event listener to prevent multiple submissions
+                    tagForm.removeEventListener('submit', submitHandler);
                 } else {
                     alert('Tag should start with #');
+                    tagInput.value = ''; // Clear the input field
+                    tagInput.focus(); // Set the focus back on the input field
                 }
-            });
+            };
+            tagForm.addEventListener('submit', submitHandler);
+        }
+        
+
+        // Function to close the modal
+        function closeModal() {
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'none';
         }
 
         // Function to fetch tags from the server and populate the datalist
@@ -441,7 +458,7 @@
             }
         }
     </script>
-    
+
 </body>
 
 </html>
