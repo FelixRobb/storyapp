@@ -69,6 +69,19 @@
             margin-bottom: 20px;
         }
 
+        .tagbutt {
+            width: 30%;
+            max-width: 60px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 14px ;
+        }
+        
         .chapter-list {
             width: 95%;
             margin-top: 20px;
@@ -361,7 +374,7 @@
 
                 <label for="tags">Tags:</label>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <button style="width: 100px;" onclick="openModal()">Add Tag</button>
+                    <a class="tagbutt" onclick="openModal()">Add Tag</a>
                     <input type="text" id="tags" name="tags">
                 </div>
 

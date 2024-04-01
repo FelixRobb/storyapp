@@ -10,7 +10,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_sqlalchemy import SQLAlchemy
 from flask_argon2 import Argon2
 from flask_migrate import Migrate
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, desc, nulls_last
 from sqlalchemy.orm import aliased
 from datetime import datetime, timezone
 from flask_wtf import FlaskForm
@@ -26,7 +26,7 @@ secrets = SystemRandom()
 app = Flask(__name__)
 
 
-app.config['SECRET_KEY'] = "knkdjnkjnjdjdj"
+app.config['SECRET_KEY'] = "heyhowareyou"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stories.db'
 app.config['IMAGE_UPLOAD_FOLDER'] = 'static/images/profpics'
 app.config['AUDIO_UPLOAD_FOLDER'] = 'static/audio'
@@ -437,7 +437,7 @@ def index():
             stories = (
                 Story.query
                 .join(subquery, Story.id == subquery.c.story_id, isouter=True)
-                .order_by(subquery.c.max_date.desc().nullslast())
+                .order_by(desc(subquery.c.max_date).nulls_last())
                 .all()
             )
 
