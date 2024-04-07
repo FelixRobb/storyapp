@@ -355,14 +355,6 @@ def login():
 
     return render_template('login.html', form=form)
 
-# Logout
-@app.route('/logout', methods=['GET', 'POST'])
-@login_required
-def logout():
-    logout_user()
-    flash('You have been logged out.', 'success')
-    return redirect(url_for('index'))
-
 
 # Register
 @app.route('/register', methods=['GET', 'POST'])
@@ -374,17 +366,17 @@ def register():
         confirm_password = request.form.get('confirm_password')
 
         if password != confirm_password:
-            flash('Passwords do not match. Please try again.', 'error')
+            flash('Passwords do not match. Please try again.', 'register')
         else:
             # Check if the username is already taken
             existing_user = User.query.filter_by(username=username).first()
             if existing_user:
-                flash('Username is already taken. Please choose another one.', 'error')
+                flash('Username is already taken. Please choose another one.', 'register')
             else:
                 # Check if the email is already reagistered
                 existing_email = User.query.filter_by(email=email).first()
                 if existing_email:
-                    flash('Email is already registered. Please use another email.', 'error')
+                    flash('Email is already registered. Please use another email.', 'register')
                 else:
                     new_user = User(username=username, email=email, password=password)
                     new_user.set_password(password)
@@ -398,6 +390,13 @@ def register():
     return render_template('register.html')
 
 
+# Logout
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('index'))
 
 
 # index/Feed

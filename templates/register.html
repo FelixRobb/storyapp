@@ -1,46 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
             font-family: 'Montserrat', sans-serif;
             overflow: hidden;
             background: url("static/images/loginbg.jpeg") no-repeat;
             background-size: cover;
             background-position: center;
-            animation: animateBg 10s linear infinite;
-        }
-
-        .headt {
-    height: 80px;
-    text-align: center;
-    font-size: 18px;
-    border-top: 1px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom: 2px solid #56f35c8f;
-    margin-bottom: 40px;
-    font-family:'Times New Roman', Times, serif;
-    font-size: 40px;
-    text-align: center;
-    display: flex; /* Add this line */
-    align-items: center; /* Add this line */
-    justify-content: center;
-}
-
-        .wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             height: 100vh;
-            width: 100%;
-            background-size: cover;
-            background-position: center;
             animation: animateBg 10s linear infinite;
         }
 
@@ -48,9 +20,43 @@
             0% {
                 filter: hue-rotate(0deg);
             }
+
             100% {
                 filter: hue-rotate(360deg);
             }
+        }
+
+        main {
+            margin: auto;
+            max-width: 600px;
+        }
+
+        .headt {
+            height: 80px;
+            text-align: center;
+            font-size: 18px;
+            border-top: 1px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 2px solid #56f35c8f;
+            margin-bottom: 40px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 40px;
+            text-align: center;
+            display: flex;
+            /* Add this line */
+            align-items: center;
+            /* Add this line */
+            justify-content: center;
+        }
+
+        .wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 700px;
+            background-size: cover;
+            background-position: center;
         }
 
         .register-form {
@@ -68,9 +74,10 @@
             margin: auto;
             margin-top: 100px;
             background: transparent;
-            -webkit-backdrop-filter: blur(15px); /* For WebKit-based browsers */
+            -webkit-backdrop-filter: blur(30px);
+            /* For WebKit-based browsers */
             backdrop-filter: blur(15px);
-            color:#fff;
+            color: #fff;
         }
 
         input {
@@ -93,6 +100,7 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
         .login-link {
             color: #00ff00;
             text-decoration: none;
@@ -105,8 +113,17 @@
             text-align: center;
             margin-bottom: 20px;
         }
+
+        .flash-messages {
+            border: 1px solid #555;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #444;
+        }
     </style>
 </head>
+
 <body>
     <header style="max-width: 800px;
     margin: 20px auto;">
@@ -115,29 +132,40 @@
         </div>
     </header>
     <main>
-    <div class="wrapper">
-        <div class="register-form">
-            <h2 class="h2title">Register</h2>
-            <form action="{{ url_for('register') }}" method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
+        <div class="wrapper">
+            <div class="register-form">
+                <h2 class="h2title">Register</h2>
+                <form action="{{ url_for('register') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
 
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
 
-                <label for="confirm_password">Confirm Password:</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
 
-                <button type="submit">Register</button>
-            </form>
-            <p>Already have an account? <a href="{{ url_for('login') }}" class="login-link">Login here</a></p>
+                    <label for="confirm_password">Confirm Password:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages if category == 'register' %}
+                    <div class="flash-messages">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <button type="submit">Register</button>
+                </form>
+                <p>Already have an account? <a href="{{ url_for('login') }}" class="login-link">Login here</a></p>
+            </div>
         </div>
-    </div>
-</main>
+    </main>
 </body>
+
 </html>
