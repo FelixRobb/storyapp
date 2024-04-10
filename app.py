@@ -5,7 +5,7 @@ import os
 import string
 import random
 import hashlib 
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_argon2 import Argon2
@@ -15,7 +15,7 @@ from sqlalchemy.orm import aliased
 from datetime import datetime, timezone
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, FileField, validators, PasswordField, BooleanField, SelectField
-from wtforms.validators import DataRequired, Email
+from wtforms.validators import DataRequired, Email, EqualTo
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
@@ -280,14 +280,15 @@ class PrivacySettingsForm(FlaskForm):
 
 
 # Account settings
-class AccountSettingsForm(FlaskForm):
+class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired()])
-    new_email = StringField('New Email')  # Add new_email field for changing email
-    submit = SubmitField('Change Password/Email')
+    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password', message='Passwords must match')])
+    submit_password = SubmitField('Change Password')
 
-
+class ChangeEmailForm(FlaskForm):
+    new_email = StringField('New Email', validators=[DataRequired(), Email()])
+    submit_email = SubmitField('Change Email')
 
 # Notifications preferences
 
@@ -321,6 +322,12 @@ class RequestPasswordResetForm(FlaskForm):
 def internal_server_error(error):
     return render_template('error.html'), 500
 
+# Favicon
+@app.route('/favicon.ico')
+def favicon():
+    # Change the path to the location of your favicon
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
     
 # Routes
 
@@ -351,7 +358,7 @@ def login():
             login_user(user)  # Use Flask-Login's login_user function
             return redirect(url_for('index'))
         else:
-            flash('Invalid username or password', 'error')
+            flash('Invalid username or password', 'login')
 
     return render_template('login.html', form=form)
 
@@ -395,7 +402,6 @@ def register():
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.', 'success')
     return redirect(url_for('index'))
 
 
@@ -521,7 +527,7 @@ def create_story():
         db.session.add(initial_version)
         db.session.commit()
 
-        flash('Story created successfully!', 'success')
+        
         # Redirect to the view_story endpoint with the newly created story's ID
         return redirect(url_for('view_story', story_id=new_story.id))
 
@@ -592,7 +598,6 @@ def edit_story(story_id):
     story = Story.query.get(story_id)
 
     if not story:
-        flash('Story not found.', 'error')
         return redirect(url_for('index'))
 
     # Check if the current user is the author of the story
@@ -605,7 +610,6 @@ def edit_story(story_id):
         if form.validate_on_submit():
             form.populate_obj(story)  # Update the story with the form data
             db.session.commit()
-            flash('Story successfully updated.', 'success')
             return redirect(url_for('view_story', story_id=story_id))
         
         return render_template('author_edit_story.html', form=form, story=story, is_author=is_author)
@@ -638,7 +642,6 @@ def edit_story(story_id):
             db.session.add(notification)
             db.session.commit()
 
-            flash('Edit proposal submitted. The author will review and approve it.', 'info')
             return redirect(url_for('view_story', story_id=story_id))
 
         # Prepopulate form field with current story content
@@ -660,16 +663,12 @@ def handle_edit_proposal(proposal_id, action):
             proposal.status = 'accepted'
             proposal.author_approval = True
             db.session.commit()
-            flash('Edit proposal accepted!', 'success')
         elif action == 'decline':
             # Mark the edit proposal as declined
             proposal.status = 'declined'
             db.session.commit()
-            flash('Edit proposal declined.', 'info')
-        else:
-            flash('Invalid action.', 'error')
     else:
-        flash('Permission denied or edit proposal not found.', 'error')
+        flash('Permission denied or edit proposal not found.', 'proposal')
 
     return redirect(url_for('view_story', story_id=proposal.story.id))
 
@@ -720,7 +719,7 @@ def add_comment(story_id):
             db.session.add(new_comment)
             db.session.commit()
         else:
-            flash('Comment content cannot be empty.', 'com_error')
+            flash('Comment content cannot be empty.', 'comment')
 
     return redirect(url_for('view_story', story_id=story_id))
 
@@ -743,8 +742,6 @@ def follow_user(user_id):
             flash(f'You have unfollowed {user_to_follow.username}.', 'info')
 
         db.session.commit()
-    else:
-        flash('User not found or cannot follow/unfollow yourself.', 'error')
 
     return redirect(url_for('user_page', user_id=user_id))
 
@@ -813,7 +810,6 @@ def edit_profile(user_id):
                     os.remove(original_path)
 
             db.session.commit()
-            flash('Profile information updated successfully!', 'success')
             return redirect(url_for('user_page', user_id=user_id))
 
         # Pre-fill the form with current user information
@@ -822,7 +818,6 @@ def edit_profile(user_id):
 
         return render_template('edit_profile.html', user=user, form=form)
 
-    flash('Permission denied or user not found.', 'error')
     return redirect(url_for('index'))
 
 
@@ -884,43 +879,43 @@ def general_settings():
 @app.route('/user/settings/account', methods=['GET', 'POST'])
 @login_required
 def account_settings():
-    form = AccountSettingsForm()
+    change_password_form = ChangePasswordForm()
+    change_email_form = ChangeEmailForm()
 
-    if form.validate_on_submit():
-        user = current_user
-        current_password = form.current_password.data
-        new_password = form.new_password.data
-        confirm_password = form.confirm_password.data
-        new_email = form.new_email.data
+    if change_password_form.validate_on_submit() and change_password_form.submit_password.data:
+        print("Password form submitted")  # Debug statement
 
-        # Check if the current passwo(rd is correct
-        if user.check_password(current_password):
-            # Change password if new password is provided
-            if new_password:
-                # Check if the new password matches the confirmation
-                if new_password == confirm_password:
-                    user.set_password(new_password)
-                else:
-                    flash('New password and confirmation do not match.', 'error')
-                    return redirect(url_for('account_settings'))
+        current_password = change_password_form.current_password.data
+        new_password = change_password_form.new_password.data
+        confirm_password = change_password_form.confirm_password.data
 
-            # Change email if new email is provided
-            if new_email:
-                # Check if the new email is already registered
-                existing_email = User.query.filter_by(email=new_email).first()
-                if existing_email:
-                    flash('Email is already registered. Please use another email.', 'error')
-                    return redirect(url_for('account_settings'))
-                else:
-                    user.email = new_email
-
-            db.session.commit()
-            flash('Account settings saved successfully!', 'success')
-            return redirect(url_for('account_settings'))
+        if current_user.check_password(current_password):
+            if new_password == confirm_password:
+                current_user.set_password(new_password)
+                db.session.commit()
+                flash('Password changed successfully!', 'success')
+            else:
+                flash('New password and confirmation do not match.', 'error')
         else:
             flash('Current password is incorrect.', 'error')
 
-    return render_template('account_settings.html', user=current_user, form=form)
+        return redirect(url_for('account_settings'))
+
+    elif change_email_form.validate_on_submit() and change_email_form.submit_email.data:
+        print("Email form submitted")  # Debug statement
+
+        new_email = change_email_form.new_email.data
+
+        if User.query.filter_by(email=new_email).first():
+            flash('Email is already registered. Please use another email.', 'error')
+        else:
+            current_user.email = new_email
+            db.session.commit()
+            flash('Email changed successfully!', 'success')
+
+        return redirect(url_for('account_settings'))
+
+    return render_template('account_settings.html', change_password_form=change_password_form, change_email_form=change_email_form)
 
 
 # Notification Settings

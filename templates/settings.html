@@ -65,7 +65,7 @@
         </div>
     </header>
     <main>
-        <button onclick="goBack()">Go Back</button>
+        <a style="width: 100px; font-size: 13px;" href="{{ url_for('user_page', user_id=current_user.id) }}">Back to my Page</a>
         <h2>User Settings - {{ current_user.username }}</h2>
         <ul>
             <li><a href="{{ url_for('account_settings') }}">Account Settings</a></li>
@@ -74,10 +74,5 @@
          </ul>
         <p><a href="{{ url_for('logout') }}" style="background-color: #ff0000;">Logout</a></p>
     </main>
-    <script>
-        function goBack() {
-            window.history.back();
-        }
-    </script>
 </body>
 </html>

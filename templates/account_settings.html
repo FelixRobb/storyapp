@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <style>
         body {
@@ -29,38 +30,79 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        .headt {
+            display: flex;
+            height: 80px;
+            text-align: center;
+            font-size: 18px;
+            border-top: 1px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 2px solid #56f35c8f;
+            margin-bottom: 40px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 40px;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flash-messages {
+            border: 1px solid #555;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #444;
+        }
     </style><!-- Add your head content here -->
 </head>
+
 <body>
-    <h1>Account Settings</h1>
-    <h4>Change Password</h4>
-    <form method="post">
-        <label for="current_password">Current Password:</label>
-        <input type="password" id="current_password" name="current_password" required><br>
-
-        <label for="new_password">New Password:</label>
-        <input type="password" id="new_password" name="new_password" required><br>
-
-        <label for="confirm_password">Confirm New Password:</label>
-        <input type="password" id="confirm_password" name="confirm_password" required><br>
-
-        <h4>Change Email</h4>
-        <label for="new_email">New Email:</label>
-        <input type="email" id="new_email" name="new_email"><br>
+    <header style="max-width: 800px;
+    margin: 20px auto;">
+        <div class="headt">
+            <h2>STORIA</h2>
+        </div>
+    </header>
+    <main>
+        <button><a style="color: #fff;" href="{{ url_for('user_settings') }}">Settings</a></button>
+        <h1>Account Settings</h1>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <ul>
-            {% for category, message in messages %}
-            {% if category == 'message' %}
-            <li>{{ message }}</li>
-            {% endif %}
-            {% endfor %}
-        </ul>
+        {% for category, message in messages if category == 'acountset' %}
+        <div class="flash-messages">
+            {{ message }}
+        </div>
+        {% endfor %}
         {% endif %}
         {% endwith %}
+        
+        <h2>Change Password</h2>
+        <form method="post" action="/user/settings/account">
+            {{ change_password_form.hidden_tag() }}
+            <label for="current_password">Current Password:</label>
+            <input type="password" id="current_password" name="current_password" required><br>
 
-        <button style="display: block;" class="submit">Save Settings</button>
-    </form>
+            <label for="new_password">New Password:</label>
+            <input type="password" id="new_password" name="new_password" required><br>
+
+            <label for="confirm_password">Confirm New Password:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required><br>
+
+            <button type="submit" name="submit_password">Change Password</button>
+        </form>
+
+        <h2>Change Email</h2>
+        <form method="post" action="/user/settings/account">
+            {{ change_email_form.hidden_tag() }}
+            <label for="new_email">New Email:</label>
+            <input type="email" id="new_email" name="new_email" required><br>
+
+            <button type="submit" name="submit_email">Change Email</button>
+        </form>
+    </main>
 </body>
+
 </html>

@@ -74,37 +74,22 @@
         }
 
         .headt {
+            display: flex;
             height: 80px;
-            background: url("static/images/loginbg.jpeg") no-repeat;
-            animation: animateBg 50s linear infinite;
             text-align: center;
             font-size: 18px;
             border-top: 1px;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
-            border-bottom: 2px solid #10ea178f;
+            border-bottom: 2px solid #56f35c8f;
             margin-bottom: 40px;
             font-family: 'Times New Roman', Times, serif;
             font-size: 40px;
             text-align: center;
-            display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        @keyframes animateBg {
-            0% {
-                background-position-y: 0;
-            }
-
-            50% {
-                background-position-y: 100%;
-            }
-
-            100% {
-                background-position-y: 0;
-            }
-        }
     </style>
 
 <script>
@@ -181,6 +166,16 @@
 
                 <label for="tags">Tags:</label>
                 <input type="text" id="tags" name="tags" value="{{ story.tags }}">
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages if category == 'login' %}
+                    <div class="flash-messages">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
 
                 <button type="submit">Save Changes</button>
 

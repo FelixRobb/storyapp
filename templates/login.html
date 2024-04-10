@@ -146,13 +146,11 @@
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
+                    {% for category, message in messages if category == 'login' %}
                     <div class="flash-messages">
-                        {% for category, message in messages %}
-                        <div class="flash-message {{ category }}">
-                            {{ message }}
-                        </div>
-                        {% endfor %}
+                        {{ message }}
                     </div>
+                    {% endfor %}
                     {% endif %}
                     {% endwith %}
 
