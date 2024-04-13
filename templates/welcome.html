@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,7 @@
         }
 
         header {
-            background: url('https://img.freepik.com/fotos-premium/generative-ai-electric-waves-uma-imagem-hipnotica-e-energetica-de-ondas-vibrantes-de-neon-se-movendo-e-pulsando-pela-tela_13364-6183.jpg?w=1060');
+            background: url("/static/images/loginbg.jpeg") no-repeat center;
             color: #fff;
             padding: 20px;
             text-align: center;
@@ -55,114 +56,117 @@
         }
 
         /* Carousel styles */
-.slider {
-    width: 300px;
-    text-align: center;
-    overflow: hidden;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+        .slider {
+            width: 90%;
+            text-align: center;
+            overflow: hidden;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-.slides {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-}
+        .slides {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
 
-.slides::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
+        .slides::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
 
-.slides::-webkit-scrollbar-thumb {
-    background: black;
-    border-radius: 10px;
-}
+        .slides::-webkit-scrollbar-thumb {
+            background: black;
+            border-radius: 10px;
+        }
 
-.slides::-webkit-scrollbar-track {
-    background: transparent;
-}
+        .slides::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
-.slides>div {
-    scroll-snap-align: start;
-    flex-shrink: 0;
-    width: 300px;
-    height: 300px;
-    margin-right: 50px;
-    border-radius: 10px;
-    background: #eee;
-    transform-origin: center center;
-    transform: scale(1);
-    transition: transform 0.5s;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 100px;
-}
+        .slides>div {
+            scroll-snap-align: start;
+            flex-shrink: 0;
+            width: 100%;
+            height: 300px;
+            margin-right: 50px;
+            border-radius: 10px;
+            background: #eee;
+            transform-origin: center center;
+            transform: scale(1);
+            transition: transform 0.5s;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 100px;
+        }
 
-.slides>div:target {}
+        
+            
 
-.author-info {
-    background: rgba(0, 0, 0, 0.75);
-    color: white;
-    padding: 0.75rem;
-    text-align: center;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    margin: 0;
-}
+        .author-info {
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 0.75rem;
+            text-align: center;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            margin: 0;
+        }
 
-.author-info a {
-    color: white;
-}
+        .author-info a {
+            color: white;
+        }
 
-img {
-    -o-object-fit: cover;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
+        img {
+            -o-object-fit: cover;
+            object-fit: cover;
+            position: absolute;
+            object-position: top;
+            width: 100%;
+            top: 0;
+            left: auto;
 
-.slider>a {
-    display: inline-flex;
-    width: 1.5rem;
-    height: 1.5rem;
-    background: white;
-    text-decoration: none;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    margin: 0 0 0.5rem 0;
-    position: relative;
-}
+            height: 100%;
+        }
 
-.slider>a:active {
-    top: 1px;
-}
+        .slider>a {
+            display: inline-flex;
+            width: 1.5rem;
+            height: 1.5rem;
+            background: white;
+            text-decoration: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 0 0.5rem 0;
+            position: relative;
+        }
 
-.slider>a:focus {
-    background: #000;
-}
+        .slider>a:active {
+            top: 1px;
+        }
 
-/* Dont need button navigation */
-@supports (scroll-snap-type) {
-    .slider>a {
-        display: none;
-    }
-}
+        .slider>a:focus {
+            background: #000;
+        }
 
+        /* Dont need button navigation */
+        @supports (scroll-snap-type) {
+            .slider>a {
+                display: none;
+            }
+        }
     </style>
 </head>
+
 <body>
     <header>
         <h1>Welcome to the Story App</h1>
@@ -171,25 +175,25 @@ img {
         <a href="{{ url_for('register') }}" class="button">Register</a>
 
     </header>
-    <section id="app-features">
+    <section>
         <h2>App Features</h2>
         <div class="slider">
-        
+
             <div class="slides">
                 <div id="slide-1">
-                    <img src="{{ url_for('static', filename='images/Welc1.jpg') }}" alt="Example Image">
+                    <img src="{{ url_for('static', filename='images/Welc1.png') }}" alt="Example Image">
                 </div>
                 <div id="slide-2">
-                    <img src="{{ url_for('static', filename='images/Welc2.jpg') }}" alt="Example Image">
+                    <img src="{{ url_for('static', filename='images/Welc2.png') }}" alt="Example Image">
                 </div>
                 <div id="slide-3">
-                    <img src="{{ url_for('static', filename='images/Welc3.jpg') }}" alt="Example Image">
+                    <img src="{{ url_for('static', filename='images/Welc3.png') }}" alt="Example Image">
                 </div>
                 <div id="slide-4">
-                    <img src="{{ url_for('static', filename='images/Welc4.jpg') }}" alt="Example Image">
+                    <img src="{{ url_for('static', filename='images/Welc4.png') }}" alt="Example Image">
                 </div>
                 <div id="slide-5">
-                    <img src="{{ url_for('static', filename='images/Welc5.jpg') }}" alt="Example Image">
+                    <img src="{{ url_for('static', filename='images/Welc5.png') }}" alt="Example Image">
                 </div>
             </div>
         </div>
@@ -205,17 +209,7 @@ img {
     </footer>
 
     <!-- Add Bootstrap JS and Popper.js scripts -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        // Disable default scrolling behavior of anchor tags in the carousel
-        const anchorTags = document.querySelectorAll('.slider a');
-        anchorTags.forEach((anchorTag) => {
-            anchorTag.addEventListener('click', (event) => {
-                event.preventDefault();
-            });
-        });
-    </script>
+    
 </body>
+
 </html>
