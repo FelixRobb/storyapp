@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,12 +34,12 @@
         }
 
         .notif {
-    border: 1px solid #555;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    background-color: #444;
-     }
+            border: 1px solid #555;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #444;
+        }
 
         button {
             background-color: #4CAF50;
@@ -48,23 +49,28 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
     </style>
 </head>
+
 <body>
     <header style="max-width: 800px;
     margin: 20px auto;">
         <div class="headt">
             <h2>STORIA</h2>
         </div>
-     </header>
+    </header>
     <main>
         <button onclick="goBack()">Go Back</button>
         <h2>Notifications</h2>
         <ul>
             {% for notification in notifications %}
+            {% set index = loop.index0 %}
+            <a id="story-link" href="{{ url_for('view_story', story_id=story_id[index]) }}">
                 <li class="notif">{{ notification.content }}</li>
+            </a>
             {% endfor %}
+
+
         </ul>
     </main>
 </body>
@@ -73,4 +79,5 @@
         window.history.back();
     }
 </script>
+
 </html>

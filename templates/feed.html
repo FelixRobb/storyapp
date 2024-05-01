@@ -27,7 +27,7 @@
         .story {
             list-style-type: none;
             padding: 0;
-            margin-bottom: 20px;
+            margin-bottom: 50px;
         }
 
         li {
@@ -49,10 +49,11 @@
             margin-bottom: 8px;
         }
 
-        h3 {
+        .title {
             color: #fff;
             font-size: 20px;
             margin-bottom: 10px;
+            overflow: hidden;
         }
 
         .synopsis {
@@ -182,6 +183,10 @@
             overflow: hidden;
             font-size: 14px;
         }
+				
+				.plink {
+								z-index: 100
+				}
 
         @media only screen and (min-width: 800px) {
 
@@ -495,8 +500,8 @@
             <li class="story-box">
                 <a id="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
                     <div>
-                        <div class="author">{{ story.author.username }}</div>
-                        <h3>{{ story.title }}</h3>
+                        <p class="author">{{ story.author.username }}</p>
+                        <p class="title">{{ story.title }}</p>
                         <p class="synopsis">{{ story.synopsis[:200] }}</p>
                         <div class="content-preview" style="overflow: hidden;">{{ story.content[:100]|safe }}...</div>
                         <p class="tags">Tags: {{ story.tags }}</p>

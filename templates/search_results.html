@@ -19,7 +19,7 @@
         }
 
         h2 {
-            color: #ff0000;
+            color: #b9b9b9;
         }
 
         h3 {
@@ -36,12 +36,13 @@
         }
 
         a {
-            color: #00ff00;
+            color: #fff;
             text-decoration: none;
-        }
+           }
 
         a:hover {
-            color: #b8ffb8;
+            color: #ebebeb;
+            text-decoration: underline;
         }
 
         button {
@@ -55,59 +56,47 @@
 
         .results {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            gap: 20px;
+            width: 80vw;
 
+        }
+
+        .resultsdiv {
+            width: 45%;
+        }
+
+        .result:hover {
+            box-shadow: 0px 0px 3px #9e9e9e;
         }
 
         .result {
+            width: 100%;
+            display: flex;
             padding: 10px;
             border: 1px solid #575757;
             border-radius: 15px;
+            background-color: #333333;
+            overflow: hidden;
         }
-    
+
         .headt {
-        height: 80px;
-        background: url("static/images/loginbg.jpeg") no-repeat;
-        background-position: center;
-        animation: animateBg 50s linear infinite;
-        text-align: center;
-        font-size: 18px;
-        border-top: 1px;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        border-bottom: 2px solid #56f35c8f;
-        margin-bottom: 40px;
-        font-family:'Times New Roman', Times, serif;
-        font-size: 40px;
-        text-align: center;
-        display: flex; /* Add this line */
-        align-items: center; /* Add this line */
-        justify-content: center;
-    }
-
-        @keyframes animateBg {
-    0% {
-        background-position-y: 0;
-    }
-    50% {
-        background-position-y: 100%;
-    }
-    100% {
-        background-position-y: 0;
-    }
-    }
-
-        @keyframes animateBg {
-    0% {
-        background-position-y: 0;
-    }
-    50% {
-        background-position-y: 100%;
-    }
-    100% {
-        background-position-y: 0;
-    }
-}
+            display: flex;
+            height: 80px;
+            text-align: center;
+            font-size: 18px;
+            border-top: 1px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 2px solid #56f35c8f;
+            margin-bottom: 40px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 40px;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+        
     </style>
 </head>
 <body>
@@ -121,17 +110,17 @@
         <button><a href="{{ url_for('index') }}">Back to Feed</a></button>
         <h2>Search Results</h2>
     <div class="results">
-        <div>
+        <div class="resultsdiv">
         <h3>Story Results:</h3>
-        <ul>
+        <ul class="resultsul">
           {% for story in story_results %}
-           <li><a class="result" href="{{ url_for('view_story', story_id=story.id) }}">{{ story.title }}</a></li>
+           <li><a class="result" href="{{ url_for('view_story', story_id=story.id) }}">{{ story.title }} mwefbwvgierug hofivbgif dhgisdfhgofvgsfgov</a></li>
           {% endfor %}
         </ul>
         </div>
-        <div>
+        <div class="resultsdiv">
         <h3>User Results:</h3>
-        <ul>
+        <ul class="resultsul">
           {% for user in user_results %}
             <li><a class="result" href="{{ url_for('user_page', user_id=user.id) }}">{{ user.username }}</a></li>
           {% endfor %}

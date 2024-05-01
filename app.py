@@ -29,7 +29,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = "heyhowareyou"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stories.db'
 app.config['IMAGE_UPLOAD_FOLDER'] = 'static/images/profpics'
-app.config['AUDIO_UPLOAD_FOLDER'] = 'static/audio'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}  # Specify allowed file extensions if needed
 
 # Configure Flask-Mail settings for Gmail
@@ -223,8 +222,13 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    story_id = db.Column(db.Integer, db.ForeignKey('story.id'))  # Add a foreign key reference to the Story
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     read = db.Column(db.Boolean, default=False)
+
+    story = db.relationship('Story', backref='notifications')  # Define the relationship to the Story
+    # Rename the relationship to avoid the conflict
+    notification_user = db.relationship('User', backref='notification_relations')
 
 
 # Flask forms
@@ -252,7 +256,7 @@ class EditForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     synopsis = TextAreaField('Synopsis', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
-    tags = StringField('Tags', validators=[DataRequired()])
+    tags = StringField('Tags')
     submit = SubmitField('Submit Edit')
 
 # Other user edit story
@@ -610,6 +614,7 @@ def edit_story(story_id):
         if form.validate_on_submit():
             form.populate_obj(story)  # Update the story with the form data
             db.session.commit()
+            flash('Story successfully updated.', 'success')
             return redirect(url_for('view_story', story_id=story_id))
         
         return render_template('author_edit_story.html', form=form, story=story, is_author=is_author)
@@ -636,6 +641,7 @@ def edit_story(story_id):
             notification = Notification(
                 content=notification_content,
                 user=story.author,
+                story=story,
                 read=False
             )
 
@@ -852,7 +858,9 @@ def notifications():
 
     # Fetch and display notifications
     user_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
-    return render_template('notifications.html', notifications=user_notifications)
+    # Extracting story IDs from notifications
+    story_id = [notification.story_id for notification in user_notifications]
+    return render_template('notifications.html', notifications=user_notifications, story_id=story_id)
 
 # Settings
 @app.route('/user/settings', methods=['GET'])

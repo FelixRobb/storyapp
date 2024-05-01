@@ -18,6 +18,7 @@
         main {
             max-width: 800px;
             margin: 20px auto;
+            margin-bottom: 50px;
         }
 
         ul {
@@ -55,6 +56,11 @@
             margin-right: auto;
         }
 
+				    .title {
+				    				font-size: 20px;
+				    				font-weight: 600;
+				    				color: #fff
+				    }
         .content {
             margin-bottom: 20px;
 
@@ -305,9 +311,9 @@
 
 
         <div class="story-box">
-            <h2>{{ story.title }}</h2>
-            <p><strong>Author:</strong> {{ story.author.username }}</p>
-            <p><strong>Synopsis:</strong> {{ story.synopsis }}</p>
+            <p class="title">{{ story.title }}</p>
+            <p class="author"><strong>Author:</strong> {{ story.author.username }}</p>
+            <p class="synopsis"><strong>Synopsis:</strong> {{ story.synopsis }}</p>
 
             <label for="chapterSelect">Select Chapter:</label>
             <select id="chapterSelect" onchange="navigateToChapter()">
@@ -363,15 +369,6 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <label for="comment">Add a Comment:</label>
                     <input type="text" id="comment" name="comment" required>
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                    {% for category, message in messages if category == 'comment' %}
-                    <div class="flash-messages">
-                        {{ message }}
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-                    {% endwith %}
                     <button class="button" type="submit">Submit Comment</button>
                 </form>
 
