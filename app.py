@@ -29,7 +29,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = "heyhowareyou"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stories.db'
 app.config['IMAGE_UPLOAD_FOLDER'] = 'static/images/profpics'
-app.config['AUDIO_UPLOAD_FOLDER'] = 'static/audio'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}  # Specify allowed file extensions if needed
 
 # Configure Flask-Mail settings for Gmail
@@ -132,7 +131,6 @@ class User(db.Model, UserMixin):
 
     def has_unread_notifications(self):
         unread_notifications = Notification.query.filter_by(user_id=self.id, read=False).count()
-        print(f"Unread notifications count for user {self.id}: {unread_notifications}")
         return unread_notifications > 0
 
 # Send emails
@@ -223,8 +221,13 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    story_id = db.Column(db.Integer, db.ForeignKey('story.id'))  # Add a foreign key reference to the Story
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     read = db.Column(db.Boolean, default=False)
+
+    story = db.relationship('Story', backref='notifications')  # Define the relationship to the Story
+    # Rename the relationship to avoid the conflict
+    notification_user = db.relationship('User', backref='notification_relations')
 
 
 # Flask forms
@@ -252,7 +255,7 @@ class EditForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     synopsis = TextAreaField('Synopsis', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
-    tags = StringField('Tags', validators=[DataRequired()])
+    tags = StringField('Tags')
     submit = SubmitField('Submit Edit')
 
 # Other user edit story
@@ -333,7 +336,7 @@ def favicon():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.query(User).get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # Entry Page
@@ -469,8 +472,19 @@ def search_results():
 
             return render_template('search_results.html', query=search_query, story_results=story_results, user_results=user_results)
 
-    return render_template('search_results.html', query=None, story_results=None, user_results=None)
+    # Handle subsequent searches from the search results page
+    search_query = request.args.get('query', '').strip()
+    if search_query:
+        # Search within the search results
+        story_results = Story.query.filter(
+            or_(Story.title.ilike(f'%{search_query}%'), Story.tags.ilike(f'%{search_query}%'))
+        ).all()
 
+        user_results = User.query.filter(User.username.ilike(f'%{search_query}%')).all()
+
+        return render_template('search_results.html', query=search_query, story_results=story_results, user_results=user_results)
+
+    return render_template('search_results.html', query=None, story_results=None, user_results=None)
 
 @app.route('/story/<int:story_id>/save', methods=['POST'])
 @login_required
@@ -561,17 +575,28 @@ def view_story(story_id):
 @app.route('/saved_stories')
 @login_required
 def saved_stories():
-    search_query = request.args.get('search', default='', type=str)
-    
-    # Filter saved stories based on the search query
-    saved_stories = SavedStory.query.filter(
-    (SavedStory.user_id == current_user.id) &
-    SavedStory.story.has(Story.title.ilike(f"%{search_query}%"))
-).all()
+    # Retrieve the saved story IDs for the current user
+    saved_story_ids = [saved_story.story_id for saved_story in current_user.saved_stories]
 
+    # Fetch the details of the saved stories from the Story table
+    saved_stories = Story.query.filter(Story.id.in_(saved_story_ids)).all()
 
-    return render_template('saved_stories.html', saved_stories=saved_stories)
+    # Create a list to store the saved story information
+    saved_story_info = []
 
+    for story in saved_stories:
+        story_info = {
+            'id': story.id,
+            'title': story.title,
+            'author': story.author.username,
+            'synopsis': story.synopsis,
+            'content': story.content,
+            # Add any other fields you want to display
+        }
+        saved_story_info.append(story_info)
+        print(saved_story_info)
+
+    return render_template('saved_stories.html', saved_story_info=saved_story_info)
 
 # Search saved stories
 @app.route('/search_saved_stories', methods=['GET'])
@@ -610,6 +635,7 @@ def edit_story(story_id):
         if form.validate_on_submit():
             form.populate_obj(story)  # Update the story with the form data
             db.session.commit()
+            flash('Story successfully updated.', 'success')
             return redirect(url_for('view_story', story_id=story_id))
         
         return render_template('author_edit_story.html', form=form, story=story, is_author=is_author)
@@ -636,6 +662,7 @@ def edit_story(story_id):
             notification = Notification(
                 content=notification_content,
                 user=story.author,
+                story=story,
                 read=False
             )
 
@@ -852,7 +879,9 @@ def notifications():
 
     # Fetch and display notifications
     user_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
-    return render_template('notifications.html', notifications=user_notifications)
+    # Extracting story IDs from notifications
+    story_id = [notification.story_id for notification in user_notifications]
+    return render_template('notifications.html', notifications=user_notifications, story_id=story_id)
 
 # Settings
 @app.route('/user/settings', methods=['GET'])

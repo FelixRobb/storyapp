@@ -255,8 +255,7 @@
                 <li><a class="links" href="{{ url_for('notifications') }}">Notifications</a></li>
                 <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My Page</a></li>
             </ul>
-
-            <div>
+        </div>
 
     </header>
     <main>
@@ -294,8 +293,8 @@
                         src="{{ url_for('static', filename='icons/add.png') }}" alt="Example Icon"></a></div>
             <div class="plinks"><a href="{{ url_for('user_relations') }}"><img class="icon"
                         src="{{ url_for('static', filename='icons/users.png') }}" alt="Example Icon"></a></div>
-                        <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
-                            src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
+            <div class="plinks"><a href="{{ url_for('user_page', user_id=current_user.id) }}"><img class="icon"
+                        src="{{ url_for('static', filename='icons/user.png') }}" alt="Example Icon"></a></div>
         </div>
 
         <h2>User Stories</h2>
