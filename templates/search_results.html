@@ -80,6 +80,48 @@
             overflow: hidden;
         }
 
+        .search-form {
+            height: 35px;
+            max-width: 300px;
+            background-color: #2b2b2b;
+            border-radius: 22px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            text-align: center;
+            padding: 5px;
+            margin: 20px;
+            margin-left: 0px;
+            box-shadow: 0 0 4px #aba4a4;
+        }
+
+
+        input {
+            width: fit-content;
+            height: 25px;
+            background: none;
+            border: 1px;
+            border-radius: 40px;
+            color: #fff;
+            padding: 5px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            /* Set the display property to inline-block */
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
         .headt {
             display: flex;
             height: 80px;
@@ -108,6 +150,16 @@
      </header>
     <main>
         <button><a href="{{ url_for('index') }}">Back to Feed</a></button>
+
+        <div class="search-form">
+            <form method="post" action="{{ url_for('search_results', query=search_query) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="search" id="search_query" name="search_query" placeholder="Search..." required>
+                <button style="display: inline; border-radius: 50px;" type="submit">search</button>
+            </form>
+        </div>
+
+
         <h2>Search Results</h2>
     <div class="results">
         <div class="resultsdiv">

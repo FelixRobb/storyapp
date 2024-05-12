@@ -443,7 +443,7 @@
                     <div class="search-form">
                         <form method="post" action="{{ url_for('search_results', query=search_query) }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="text" id="search_query" name="search_query" placeholder="Search..." required>
+                            <input type="search" id="search_query" name="search_query" placeholder="Search..." required>
                             <button style="display: inline; border-radius: 50px;" type="submit">search</button>
                         </form>
                     </div>
@@ -480,7 +480,7 @@
             <div class="search-form2" style="margin-left: 10px; margin-right: 10px;">
                 <form method="post" action="{{ url_for('search_results', query=search_query) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="text" id="search_query" name="search_query" placeholder="Search..." required>
+                    <input type="search" id="search_query" name="search_query" placeholder="Search..." required>
                     <button style="display: inline; border-radius: 50px;" type="submit">search</button>
                 </form>
             </div>

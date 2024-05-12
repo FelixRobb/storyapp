@@ -472,8 +472,19 @@ def search_results():
 
             return render_template('search_results.html', query=search_query, story_results=story_results, user_results=user_results)
 
-    return render_template('search_results.html', query=None, story_results=None, user_results=None)
+    # Handle subsequent searches from the search results page
+    search_query = request.args.get('query', '').strip()
+    if search_query:
+        # Search within the search results
+        story_results = Story.query.filter(
+            or_(Story.title.ilike(f'%{search_query}%'), Story.tags.ilike(f'%{search_query}%'))
+        ).all()
 
+        user_results = User.query.filter(User.username.ilike(f'%{search_query}%')).all()
+
+        return render_template('search_results.html', query=search_query, story_results=story_results, user_results=user_results)
+
+    return render_template('search_results.html', query=None, story_results=None, user_results=None)
 
 @app.route('/story/<int:story_id>/save', methods=['POST'])
 @login_required
