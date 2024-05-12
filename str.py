@@ -5,17 +5,17 @@ import os
 import string
 import random
 import hashlib 
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_argon2 import Argon2
 from flask_migrate import Migrate
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, desc, nulls_last
 from sqlalchemy.orm import aliased
 from datetime import datetime, timezone
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, FileField, validators, PasswordField, BooleanField, SelectField
-from wtforms.validators import DataRequired, Email
+from wtforms.validators import DataRequired, Email, EqualTo
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
@@ -26,10 +26,9 @@ secrets = SystemRandom()
 app = Flask(__name__)
 
 
-app.config['SECRET_KEY'] = "knkdjnkjnjdjdj"
+app.config['SECRET_KEY'] = "heyhowareyou"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stories.db'
 app.config['IMAGE_UPLOAD_FOLDER'] = 'static/images/profpics'
-app.config['AUDIO_UPLOAD_FOLDER'] = 'static/audio'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}  # Specify allowed file extensions if needed
 
 # Configure Flask-Mail settings for Gmail
@@ -60,10 +59,12 @@ def add_cache_control(response):
     response.headers['Expires'] = '0'
     return response
 
-def generate_etag(content):
-    hash_object = hashlib.md5(content)
-    etag = hash_object.hexdigest()
-    return etag
+# Get the path to the tags.txt file in the static folder
+tags_file_path = os.path.join(app.root_path, 'static', 'tags.txt')
+
+# Read pre-established tags from the tags.txt file
+with open(tags_file_path, 'r') as file:
+    preestablished_tags = [line.strip() for line in file]
 
 # image functions
 def allowed_file(filename):
@@ -221,8 +222,13 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    story_id = db.Column(db.Integer, db.ForeignKey('story.id'))  # Add a foreign key reference to the Story
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     read = db.Column(db.Boolean, default=False)
+
+    story = db.relationship('Story', backref='notifications')  # Define the relationship to the Story
+    # Rename the relationship to avoid the conflict
+    notification_user = db.relationship('User', backref='notification_relations')
 
 
 # Flask forms
@@ -250,7 +256,7 @@ class EditForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     synopsis = TextAreaField('Synopsis', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
-    tags = StringField('Tags', validators=[DataRequired()])
+    tags = StringField('Tags')
     submit = SubmitField('Submit Edit')
 
 # Other user edit story
@@ -278,14 +284,15 @@ class PrivacySettingsForm(FlaskForm):
 
 
 # Account settings
-class AccountSettingsForm(FlaskForm):
+class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Current Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired()])
-    new_email = StringField('New Email')  # Add new_email field for changing email
-    submit = SubmitField('Change Password/Email')
+    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password', message='Passwords must match')])
+    submit_password = SubmitField('Change Password')
 
-
+class ChangeEmailForm(FlaskForm):
+    new_email = StringField('New Email', validators=[DataRequired(), Email()])
+    submit_email = SubmitField('Change Email')
 
 # Notifications preferences
 
@@ -319,6 +326,12 @@ class RequestPasswordResetForm(FlaskForm):
 def internal_server_error(error):
     return render_template('error.html'), 500
 
+# Favicon
+@app.route('/favicon.ico')
+def favicon():
+    # Change the path to the location of your favicon
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
     
 # Routes
 
@@ -349,17 +362,9 @@ def login():
             login_user(user)  # Use Flask-Login's login_user function
             return redirect(url_for('index'))
         else:
-            flash('Invalid username or password', 'error')
+            flash('Invalid username or password', 'login')
 
     return render_template('login.html', form=form)
-
-# Logout
-@app.route('/logout', methods=['GET', 'POST'])
-@login_required
-def logout():
-    logout_user()
-    flash('You have been logged out.', 'success')
-    return redirect(url_for('index'))
 
 
 # Register
@@ -372,17 +377,17 @@ def register():
         confirm_password = request.form.get('confirm_password')
 
         if password != confirm_password:
-            flash('Passwords do not match. Please try again.', 'error')
+            flash('Passwords do not match. Please try again.', 'register')
         else:
             # Check if the username is already taken
             existing_user = User.query.filter_by(username=username).first()
             if existing_user:
-                flash('Username is already taken. Please choose another one.', 'error')
+                flash('Username is already taken. Please choose another one.', 'register')
             else:
                 # Check if the email is already reagistered
                 existing_email = User.query.filter_by(email=email).first()
                 if existing_email:
-                    flash('Email is already registered. Please use another email.', 'error')
+                    flash('Email is already registered. Please use another email.', 'register')
                 else:
                     new_user = User(username=username, email=email, password=password)
                     new_user.set_password(password)
@@ -396,6 +401,12 @@ def register():
     return render_template('register.html')
 
 
+# Logout
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 # index/Feed
@@ -435,7 +446,7 @@ def index():
             stories = (
                 Story.query
                 .join(subquery, Story.id == subquery.c.story_id, isouter=True)
-                .order_by(subquery.c.max_date.desc().nullslast())
+                .order_by(desc(subquery.c.max_date).nulls_last())
                 .all()
             )
 
@@ -520,11 +531,17 @@ def create_story():
         db.session.add(initial_version)
         db.session.commit()
 
-        flash('Story created successfully!', 'success')
+        
         # Redirect to the view_story endpoint with the newly created story's ID
         return redirect(url_for('view_story', story_id=new_story.id))
 
     return render_template('create_story.html', form=form)
+
+
+# Route to fetch the pre-established tags
+@app.route('/get_tags', methods=['GET'])
+def get_tags():
+    return jsonify(tags=preestablished_tags)
 
 
 # View story
@@ -548,17 +565,9 @@ def view_story(story_id):
 @app.route('/saved_stories')
 @login_required
 def saved_stories():
-    search_query = request.args.get('search', default='', type=str)
-    
-    # Filter saved stories based on the search query
-    saved_stories = SavedStory.query.filter(
-    (SavedStory.user_id == current_user.id) &
-    SavedStory.story.has(Story.title.ilike(f"%{search_query}%"))
-).all()
-
-
+    saved_stories = SavedStory.query.filter_by(user_id=current_user.id).all()
+    print("saved_stories: ", saved_stories)
     return render_template('saved_stories.html', saved_stories=saved_stories)
-
 
 # Search saved stories
 @app.route('/search_saved_stories', methods=['GET'])
@@ -585,7 +594,6 @@ def edit_story(story_id):
     story = Story.query.get(story_id)
 
     if not story:
-        flash('Story not found.', 'error')
         return redirect(url_for('index'))
 
     # Check if the current user is the author of the story
@@ -625,13 +633,13 @@ def edit_story(story_id):
             notification = Notification(
                 content=notification_content,
                 user=story.author,
+                story=story,
                 read=False
             )
 
             db.session.add(notification)
             db.session.commit()
 
-            flash('Edit proposal submitted. The author will review and approve it.', 'info')
             return redirect(url_for('view_story', story_id=story_id))
 
         # Prepopulate form field with current story content
@@ -653,16 +661,12 @@ def handle_edit_proposal(proposal_id, action):
             proposal.status = 'accepted'
             proposal.author_approval = True
             db.session.commit()
-            flash('Edit proposal accepted!', 'success')
         elif action == 'decline':
             # Mark the edit proposal as declined
             proposal.status = 'declined'
             db.session.commit()
-            flash('Edit proposal declined.', 'info')
-        else:
-            flash('Invalid action.', 'error')
     else:
-        flash('Permission denied or edit proposal not found.', 'error')
+        flash('Permission denied or edit proposal not found.', 'proposal')
 
     return redirect(url_for('view_story', story_id=proposal.story.id))
 
@@ -713,7 +717,7 @@ def add_comment(story_id):
             db.session.add(new_comment)
             db.session.commit()
         else:
-            flash('Comment content cannot be empty.', 'com_error')
+            flash('Comment content cannot be empty.', 'comment')
 
     return redirect(url_for('view_story', story_id=story_id))
 
@@ -736,8 +740,6 @@ def follow_user(user_id):
             flash(f'You have unfollowed {user_to_follow.username}.', 'info')
 
         db.session.commit()
-    else:
-        flash('User not found or cannot follow/unfollow yourself.', 'error')
 
     return redirect(url_for('user_page', user_id=user_id))
 
@@ -806,7 +808,6 @@ def edit_profile(user_id):
                     os.remove(original_path)
 
             db.session.commit()
-            flash('Profile information updated successfully!', 'success')
             return redirect(url_for('user_page', user_id=user_id))
 
         # Pre-fill the form with current user information
@@ -815,7 +816,6 @@ def edit_profile(user_id):
 
         return render_template('edit_profile.html', user=user, form=form)
 
-    flash('Permission denied or user not found.', 'error')
     return redirect(url_for('index'))
 
 
@@ -850,13 +850,10 @@ def notifications():
 
     # Fetch and display notifications
     user_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
-    return render_template('notifications.html', notifications=user_notifications)
+    # Extracting story IDs from notifications
+    story_id = [notification.story_id for notification in user_notifications]
+    return render_template('notifications.html', notifications=user_notifications, story_id=story_id)
 
-# Settings
-@app.route('/user/settings', methods=['GET'])
-@login_required
-def user_settings():
-    return render_template('settings.html', user=current_user)
 
 
 # Run app
