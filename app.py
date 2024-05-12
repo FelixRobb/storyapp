@@ -131,7 +131,6 @@ class User(db.Model, UserMixin):
 
     def has_unread_notifications(self):
         unread_notifications = Notification.query.filter_by(user_id=self.id, read=False).count()
-        print(f"Unread notifications count for user {self.id}: {unread_notifications}")
         return unread_notifications > 0
 
 # Send emails
@@ -337,7 +336,7 @@ def favicon():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.query(User).get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # Entry Page
@@ -565,17 +564,28 @@ def view_story(story_id):
 @app.route('/saved_stories')
 @login_required
 def saved_stories():
-    search_query = request.args.get('search', default='', type=str)
-    
-    # Filter saved stories based on the search query
-    saved_stories = SavedStory.query.filter(
-    (SavedStory.user_id == current_user.id) &
-    SavedStory.story.has(Story.title.ilike(f"%{search_query}%"))
-).all()
+    # Retrieve the saved story IDs for the current user
+    saved_story_ids = [saved_story.story_id for saved_story in current_user.saved_stories]
 
+    # Fetch the details of the saved stories from the Story table
+    saved_stories = Story.query.filter(Story.id.in_(saved_story_ids)).all()
 
-    return render_template('saved_stories.html', saved_stories=saved_stories)
+    # Create a list to store the saved story information
+    saved_story_info = []
 
+    for story in saved_stories:
+        story_info = {
+            'id': story.id,
+            'title': story.title,
+            'author': story.author.username,
+            'synopsis': story.synopsis,
+            'content': story.content,
+            # Add any other fields you want to display
+        }
+        saved_story_info.append(story_info)
+        print(saved_story_info)
+
+    return render_template('saved_stories.html', saved_story_info=saved_story_info)
 
 # Search saved stories
 @app.route('/search_saved_stories', methods=['GET'])

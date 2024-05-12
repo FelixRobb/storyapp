@@ -163,23 +163,23 @@
         }
 
         .search-form {
-            width: 50%;
-            height: 35px;
-            background-color: #2b2b2b;
-            border-radius: 22px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            text-align: center;
-            padding: 5px;
-            box-shadow: 0 0 4px #aba4a4;
-        }
+                width: 50%;
+                height: 35px;
+                background-color: #2b2b2b;
+                border-radius: 22px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                text-align: center;
+                padding: 5px;
+                box-shadow: 0 0 4px #aba4a4;
+            }
 
-        .searchResultsContainer {
-            border: #2b2b2b 1px solid;
-            border-radius: 20px;
-        }
+            .searchResultsContainer {
+                border: #2b2b2b 1px solid;
+                border-radius: 20px;
+            }
 
         @media only screen and (min-width: 800px) {
 
@@ -188,7 +188,7 @@
                 display: none;
             }
 
-
+            
 
             .linksn {
                 display: none;
@@ -349,8 +349,8 @@
                         Story</a></li>
                 <li><a class="links" href="{{ url_for('user_relations') }}">User
                         Relations</a></li>
-                <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My
-                        Page</a></li>
+                        <li><a class="links" href="{{ url_for('user_page', user_id=current_user.id) }}">My
+                            Page</a></li>
             </ul>
         </div>
     </header>
@@ -377,52 +377,53 @@
 
         <div id="savedStoriesContainer">
 
-            <ul class="story">
-                {% for story in saved_story_info %}
-                <a class="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
-                    <li class="story-box">
-                        <div class="author">{{ story.author.username }}</div>
-                        <h3>{{ story.title }}</h3>
-                        <p class="synopsis">{{ story.synopsis[:200] }}</p>
-                        <div class="content-preview" style="overflow: hidden;">{{ story.content[:100]|safe }}...
-                    </li>
-                </a>
-                {% endfor %}
-            </ul>
+        <ul class="story">
+            {% for story in saved_story_info %}
+            <a class="story-link" href="{{ url_for('view_story', story_id=story.id) }}">
+                <li class="story-box">
+                    <div class="author">{{ story.story.author.username }}</div>
+                    <h3>{{ story.story.title }}</h3>
+                    <p class="synopsis">{{ story.story.synopsis[:200] }}</p>
+                    <div class="content-preview" style="overflow: hidden;">{{ story.story.content[:100]|safe }}...</div>
+                    <p class="tags">Tags: {{ story.story.tags }}</p>
+                </li>
+            </a>
+            {% endfor %}
+        </ul>
 
-        </div>
+    </div>
     </main>
     <script>
         function handleSearch() {
-            const searchQuery = document.getElementById('searchQuery').value;
+    const searchQuery = document.getElementById('searchQuery').value;
 
-            fetch(`/search_saved_stories?query=${searchQuery}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token() }}'
-                },
-                credentials: 'same-origin',
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const searchResultsContainer = document.getElementById('searchResultsContainer');
-                    searchResultsContainer.innerHTML = ''; // Clear previous results
+    fetch(`/search_saved_stories?query=${searchQuery}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        credentials: 'same-origin',
+    })
+    .then(response => response.json())
+    .then(data => {
+        const searchResultsContainer = document.getElementById('searchResultsContainer');
+        searchResultsContainer.innerHTML = ''; // Clear previous results
 
-                    if (data.length > 0) {
-                        data.forEach(story => {
-                            const resultItem = document.createElement('div');
-                            resultItem.innerHTML = `<a href="${story.url}">${story.title}</a>`;
-                            searchResultsContainer.appendChild(resultItem);
-                        });
-                    } else {
-                        searchResultsContainer.innerHTML = 'No results found.';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error searching stories:', error);
-                });
+        if (data.length > 0) {
+            data.forEach(story => {
+                const resultItem = document.createElement('div');
+                resultItem.innerHTML = `<a href="${story.url}">${story.title}</a>`;
+                searchResultsContainer.appendChild(resultItem);
+            });
+        } else {
+            searchResultsContainer.innerHTML = 'No results found.';
         }
+    })
+    .catch(error => {
+        console.error('Error searching stories:', error);
+    });
+}
 
     </script>
 </body>
