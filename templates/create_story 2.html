@@ -271,78 +271,70 @@
         });
     </script>
 
-
     <script>
-        // Fetch tags from the server and populate the datalist
-        function fetchTags() {
-            fetch('/get_tags')
-                .then(response => response.json())
-                .then(data => {
-                    const tags = data.tags;
+        document.addEventListener('DOMContentLoaded', function () {
+            let allTags = [];
 
-                    // Populate the datalist with fetched tags
-                    const tagList = document.getElementById('tagList');
-                    tags.forEach(tag => {
-                        const option = document.createElement('option');
-                        option.value = tag;
-                        tagList.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching tags:', error));
-        }
+            // Fetch tags from server on page load
+            function fetchTags() {
+                fetch('/get_tags')
+                    .then(response => response.json())
+                    .then(data => {
+                        allTags = data.tags;
+                        const tagList = document.getElementById('tagList');
+                        allTags.forEach(tag => {
+                            const option = document.createElement('option');
+                            option.value = tag;
+                            tagList.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching tags:', error));
+            }
 
-        // Function to check if a tag starts with '#'
-        function isValidTag(tag) {
-            return tag.trim().startsWith('#');
-        }
-
-        // Function to initialize tag autocomplete
-        function initializeTagAutocomplete() {
-            const tagsInput = document.getElementById('tags');
-            const tagList = document.getElementById('tagList');
-
-            // Variable to store the previous value of the input field
-            let prevValue = tagsInput.value;
-
-            tagsInput.addEventListener('input', () => {
-                const enteredTags = tagsInput.value.split(',').map(tag => tag.trim());
-
-                // Clear the datalist options
-                while (tagList.firstChild) {
-                    tagList.removeChild(tagList.firstChild);
-                }
-
-                // Add valid tags to the datalist
-                enteredTags.forEach(tag => {
-                    if (tag.startsWith('#')) {
-                        const option = document.createElement('option');
-                        option.value = tag;
-                        tagList.appendChild(option);
-                    }
-                });
-
-                // If the input starts with '#', show autocomplete
-                if (tagsInput.value.includes('#')) {
-                    tagsInput.setAttribute('list', 'tag-list');
-                } else {
-                    tagsInput.removeAttribute('list');
-                }
-
-                // If there's a space after the last character, remove autocomplete
-                if (tagsInput.value.trim().slice(-1) === ' ' && !tagsInput.value.startsWith('#')) {
-                    tagsInput.removeAttribute('list');
-                    tagsInput.removeAttribute('list');
-                }
-
-                // Update the previous value
-                prevValue = tagsInput.value;
-            });
-        }
-
-        // Fetch tags when the document is ready
-        document.addEventListener('DOMContentLoaded', () => {
             fetchTags();
-            initializeTagAutocomplete();
+
+            // Handle tag input
+            const tagsInput = document.getElementById('tags');
+            tagsInput.addEventListener('input', function (e) {
+                const value = e.target.value;
+                const lastWord = value.split(' ').pop();
+                if (lastWord.length > 0) {
+                    $(this).autocomplete({
+                        source: allTags,
+                        select: function (event, ui) {
+                            const currentTags = tagsInput.value.trim();
+                            const newTag = ui.item.value;
+                            const updatedTags = currentTags.substring(0, currentTags.lastIndexOf(" ") + 1) + newTag + ' ';
+                            tagsInput.value = updatedTags;
+                            return false;
+                        }
+                    });
+                }
+            });
+
+            tagsInput.addEventListener('blur', function (e) {
+                const value = e.target.value.trim();
+                const lastWord = value.split(' ').pop();
+                if (lastWord.length > 0 && !allTags.includes(lastWord)) {
+                    saveTagToServer(lastWord);
+                }
+            });
+
+            function saveTagToServer(tag) {
+                fetch('/add_tag', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ tag: tag })
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Tag saved successfully.');
+                            allTags.push(tag); // Add the new tag to the list
+                        }
+                    }).catch(error => console.error('Error saving tag:', error));
+            }
         });
     </script>
 
@@ -398,14 +390,13 @@
                     required></textarea>
 
                 <label for="tags">Tags:</label>
-                <input type="text" id="tags" name="tags" list="tagList" placeholder="Add tags starting with '#'">
-
-                <!-- Datalist for tag autocomplete -->
+                <input type="text" id="tags" name="tags" placeholder="Start typing tags..." list="tagList">
                 <datalist id="tagList"></datalist>
 
                 <button type="submit">Create Story</button>
-
             </form>
+
+
         </div>
 
     </main>
