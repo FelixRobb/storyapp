@@ -1,3 +1,6 @@
+import mysql.connector
+
+
 SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
     username="the username from the 'Databases' tab",
     password="the password you set on the 'Databases' tab",

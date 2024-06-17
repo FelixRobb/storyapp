@@ -11,8 +11,6 @@
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
         }
 
         header {
@@ -20,6 +18,8 @@
             color: #fff;
             padding: 20px;
             text-align: center;
+            background-size: cover;
+            background-position-x: center;
         }
 
         section {
@@ -106,8 +106,8 @@
             font-size: 100px;
         }
 
-        
-            
+
+
 
         .author-info {
             background: rgba(0, 0, 0, 0.75);
@@ -176,11 +176,14 @@
 
 <body>
     <header>
-        <h1>Welcome to the Story App</h1>
-        <p>Explore and share your stories with the world!</p>
-        <a href="{{ url_for('login') }}" class="button">Login</a>
-        <a href="{{ url_for('register') }}" class="button">Register</a>
-
+        <div>
+            <h1>Welcome to the Story App</h1>
+            <p>Explore and share your stories with the world!</p>
+        </div>
+        <div style="display: flex; justify-content: center;">
+            <a href="{{ url_for('login') }}" class="button">Login</a>
+            <a href="{{ url_for('register') }}" class="button">Register</a>
+        </div>
     </header>
     <section>
         <h2>App Features</h2>
@@ -216,7 +219,7 @@
     </footer>
 
     <!-- Add Bootstrap JS and Popper.js scripts -->
-    
+
 </body>
 
 </html>

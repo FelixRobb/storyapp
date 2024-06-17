@@ -148,7 +148,11 @@ This is an automatic email, please dont respond.
 '''
     mail.send(msg)
 
-
+# Tag system
+story_tags = db.Table('story_tags',
+    db.Column('story_id', db.Integer, db.ForeignKey('story.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+)
 
 # Story class
 class Story(db.Model):
@@ -156,7 +160,7 @@ class Story(db.Model):
     title = db.Column(db.String(255), nullable=False)
     synopsis = db.Column(db.String(1000), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    tags = db.Column(db.String(255))
+    tags = db.relationship('Tag', secondary=story_tags, backref=db.backref('stories', lazy='dynamic'))
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     author = db.relationship('User', back_populates='stories')
     versions = db.relationship('Version', back_populates='story', foreign_keys="[Version.story_id]")
@@ -171,6 +175,12 @@ class SavedStory(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     story_id = db.Column(db.Integer, db.ForeignKey('story.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# Tags
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
 
 
 # Comment class
@@ -428,7 +438,7 @@ def index():
                 stories = (
                     Story.query
                     .join(subquery, Story.id == subquery.c.story_id, isouter=True)
-                    .order_by(subquery.c.max_date.desc().nullslast())
+                    .order_by(subquery.c.max_date.desc())
                     .all()
                 )
 
@@ -445,7 +455,7 @@ def index():
             stories = (
                 Story.query
                 .join(subquery, Story.id == subquery.c.story_id, isouter=True)
-                .order_by(desc(subquery.c.max_date).nulls_last())
+                .order_by(subquery.c.max_date.desc())
                 .all()
             )
 
@@ -486,6 +496,8 @@ def search_results():
 
     return render_template('search_results.html', query=None, story_results=None, user_results=None)
 
+
+# Save story
 @app.route('/story/<int:story_id>/save', methods=['POST'])
 @login_required
 def save_story(story_id):
@@ -508,7 +520,7 @@ def save_story(story_id):
         db.session.commit()
         return jsonify({'status': 'saved'})
 
-# Create story
+
 @app.route('/create_story', methods=['GET', 'POST'])
 @login_required
 def create_story():
@@ -518,40 +530,59 @@ def create_story():
         title = form.title.data
         synopsis = form.synopsis.data
         content = form.content.data
-        tags = form.tags.data
+        tags = form.tags.data.split()  # Split the tags by space
 
         # Save content with actual newline characters
         new_story = Story(
             title=title,
             synopsis=synopsis,
-            content=content,  # Save content with \n
-            tags=tags,
+            content=content,
             author=current_user
         )
 
-        # Create an initial version for the story
-        initial_version = Version(
-            date=datetime.utcnow(),
-            content=content.replace('\n', '<br>'),  # Convert newline characters to <br>
-            story=new_story
-        )
-
+        # Handle tag creation and association with the story
+        tag_objects = []
+        for tag_name in tags:
+            if tag_name.startswith('#'):
+                tag_name = tag_name[1:]  # Remove the hashtag prefix
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                db.session.add(tag)
+                db.session.flush()  # Flush to get the tag id
+            tag_objects.append(tag)
         
+        new_story.tags = tag_objects
+
         db.session.add(new_story)
-        db.session.add(initial_version)
         db.session.commit()
 
-        
         # Redirect to the view_story endpoint with the newly created story's ID
         return redirect(url_for('view_story', story_id=new_story.id))
 
     return render_template('create_story.html', form=form)
 
 
+
 # Route to fetch the pre-established tags
-@app.route('/get_tags', methods=['GET'])
+@app.route('/get_tags')
 def get_tags():
-    return jsonify(tags=preestablished_tags)
+    tags = Tag.query.all()
+    tag_list = [tag.name for tag in tags]
+    return jsonify({'tags': tag_list})
+
+# Add tags
+@app.route('/add_tag', methods=['POST'])
+def add_tag():
+    tag_name = request.json.get('tag')
+    if tag_name:
+        tag = Tag.query.filter_by(name=tag_name).first()
+        if not tag:
+            new_tag = Tag(name=tag_name)
+            db.session.add(new_tag)
+            db.session.commit()
+            return jsonify({'success': True, 'tag': tag_name})
+    return jsonify({'success': False})
 
 
 # View story
@@ -717,6 +748,9 @@ def delete_story(story_id):
 
             # Delete associated records in edit_proposal table
             EditProposal.query.filter_by(story_id=story_id).delete()
+
+            # Delete associated records in saved_story table
+            SavedStory.query.filter_by(story_id=story_id).delete()
 
             # Delete the story
             db.session.delete(story)
