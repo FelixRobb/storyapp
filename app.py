@@ -518,9 +518,9 @@ def create_story():
         title = form.title.data
         synopsis = form.synopsis.data
         content = form.content.data
-        tags = form.tags.data
-
+        tags = form.tags.data.split(',')
         # Save content with actual newline characters
+        
         new_story = Story(
             title=title,
             synopsis=synopsis,

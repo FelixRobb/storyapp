@@ -79,9 +79,9 @@
             border-radius: 4px;
             cursor: pointer;
             margin-bottom: 20px;
-            font-size: 14px ;
+            font-size: 14px;
         }
-        
+
         .chapter-list {
             width: 95%;
             margin-top: 20px;
@@ -134,67 +134,29 @@
         }
 
 
-        /* Container for the autocomplete suggestions */
-        #ui-id-1 {
-            position: absolute;
-            max-height: 35px;
-            overflow-y: hidden;
-            border: 1px solid #6a6a6a;
-            border-radius: 0px 0px 12px 12px;
-            background-color: #303030;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            /* Ensure it appears above other elements */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
         }
-
-        /* Individual suggestion items */
-        .ui-menu-item {
-            padding: 8px;
-            cursor: pointer;
-        }
-
-        /* Highlight the selected suggestion */
-        .custom-autocomplete-item.ui-state-focus,
-        .custom-autocomplete-item.ui-state-active {
-            background-color: #838383;
+        .tag {
+            background-color: #505050;
             color: #fff;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
         }
-
-
-        .modal {
-            display: none;
-            position: fixed;
-            width: 80%;
-            max-width: 600px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-content {
-            background-color: #303030;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            border-radius: 20px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
+        .tag .remove-tag {
+            background: none;
+            border: none;
+            color: #fff;
+            margin-left: 5px;
             cursor: pointer;
         }
+
+
 
         @media only screen and (max-width: 700px) {
 
@@ -320,6 +282,60 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let allTags = [];
+
+            function fetchTags() {
+                fetch('/get_tags')
+                    .then(response => response.json())
+                    .then(data => {
+                        allTags = data.tags;
+                        const tagList = document.getElementById('tagList');
+                        allTags.forEach(tag => {
+                            const option = document.createElement('option');
+                            option.value = tag;
+                            tagList.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching tags:', error));
+            }
+
+            fetchTags();
+
+            const tagsInput = document.getElementById('tags');
+            const tagsContainer = document.querySelector('.tags-container');
+
+            tagsInput.addEventListener('input', function (e) {
+                const value = e.target.value;
+                const lastWord = value.split(' ').pop();
+
+                if (lastWord.length > 0) {
+                    $(this).autocomplete({
+                        source: allTags.filter(tag => tag.startsWith(lastWord)),
+                        select: function (event, ui) {
+                            addTag(ui.item.value);
+                            tagsInput.value = '';  // Clear the input
+                            return false;
+                        }
+                    });
+                }
+            });
+
+            function addTag(tag) {
+                if (allTags.includes(tag) && ![...tagsContainer.children].some(el => el.textContent.trim() === tag)) {
+                    const tagElement = document.createElement('div');
+                    tagElement.classList.add('tag');
+                    tagElement.innerHTML = `${tag} <button class="remove-tag">x</button>`;
+                    tagElement.querySelector('.remove-tag').addEventListener('click', () => {
+                        tagsContainer.removeChild(tagElement);
+                    });
+                    tagsContainer.appendChild(tagElement);
+                }
+            }
+        });
+    </script>
+
 
 </head>
 
@@ -363,114 +379,25 @@
                 <input type="text" id="title" name="title" placeholder="The title of your story" required>
 
                 <label for="synopsis">Synopsis:</label>
-                <textarea style="max-height: 30px;" type="text" id="synopsis" name="synopsis"
-                    placeholder="Ideally 200 characters" required></textarea>
+                <textarea id="synopsis" name="synopsis" placeholder="Ideally 200 characters" required></textarea>
 
                 <div id="chapter-list" class="chapter-list"></div>
 
                 <label for="content">Content:</label>
-                <textarea style="min-height: 150px;" name="content" placeholder="The content of the story itself"
-                    required></textarea>
+                <textarea name="content" placeholder="The content of the story itself" required></textarea>
 
                 <label for="tags">Tags:</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <a class="tagbutt" onclick="openModal()">Add Tag</a>
-                    <input type="text" id="tags" name="tags">
-                </div>
+                <input type="text" id="tags" placeholder="Start typing tags...">
+                <datalist id="tagList"></datalist>
+                <div class="tags-container"></div>
 
-
+                
                 <button type="submit">Create Story</button>
-
             </form>
-
-            <div id="myModal" class="modal">
-                <div class="modal-content">
-                    <span onclick="closeModal()" class="close">&times;</span>
-                    <form id="tagForm">
-                        <label for="tagInput">Enter Tag:</label>
-                        <input type="text" id="tagInput" name="tagInput" placeholder="Enter only one tag starting with #"
-                            required list="tagList">
-                        <button type="submit">Submit</button>
-                    </form>
-                    <datalist id="tagList"></datalist>
-                </div>
-            </div>
+        </div>
 
     </main>
 
-    <script>
-        // Function to handle the modal popup
-        function openModal() {
-            const modal = document.getElementById('myModal');
-            const tagInput = document.getElementById('tagInput');
-            const tagList = document.getElementById('tagList');
-
-            modal.style.display = 'block';
-            tagList.innerHTML = ''; // Clear previous options
-
-            // Fetch tags from the server and populate the datalist
-            fetchTags();
-
-            // Focus on the input field when the modal opens
-            requestAnimationFrame(() => {
-                tagInput.focus();
-            });
-
-
-            // Handle form submission
-            const tagForm = document.getElementById('tagForm');
-            const submitHandler = function (event) {
-                event.preventDefault();
-                const tag = tagInput.value.trim();
-                if (tag && tag.startsWith('#')) {
-                    addTag(tag);
-                    tagInput.value = '';
-                    modal.style.display = 'none';
-                    // Remove event listener to prevent multiple submissions
-                    tagForm.removeEventListener('submit', submitHandler);
-                } else {
-                    alert('Tag should start with #');
-                    tagInput.value = ''; // Clear the input field
-                    tagInput.focus(); // Set the focus back on the input field
-                }
-            };
-            tagForm.addEventListener('submit', submitHandler);
-        }
-        
-
-        // Function to close the modal
-        function closeModal() {
-            const modal = document.getElementById('myModal');
-            modal.style.display = 'none';
-        }
-
-        // Function to fetch tags from the server and populate the datalist
-        function fetchTags() {
-            fetch('/get_tags')
-                .then(response => response.json())
-                .then(data => {
-                    const tags = data.tags;
-                    const tagList = document.getElementById('tagList');
-                    tags.forEach(tag => {
-                        const option = document.createElement('option');
-                        option.value = tag;
-                        tagList.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching tags:', error));
-        }
-
-        // Function to add a tag to the tag field
-        function addTag(tag) {
-            const tagsInput = document.getElementById('tags');
-            const currentTags = tagsInput.value.trim();
-            if (currentTags === '') {
-                tagsInput.value = tag;
-            } else {
-                tagsInput.value = currentTags + ', ' + tag;
-            }
-        }
-    </script>
 
 </body>
 
