@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Story</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
     <style>
         body {
             background-color: #1f1f1f;
@@ -71,6 +75,30 @@
         .chapter-number {
             font-weight: bold;
             margin-right: 5px;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 5px;
+            cursor: pointer;
         }
 
         .headt {
@@ -231,7 +259,8 @@
 <input type="text" id="tags" placeholder="Start typing tags...">
 <datalist id="tagList"></datalist>
 <div class="tags-container">
-    {% for tag in story.tags.split(' ,') %}
+   {% for tag in story.tags %}
+
         <div class="tag">{{ tag }} <button class="remove-tag">x</button></div>
     {% endfor %}
 </div>

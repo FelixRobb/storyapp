@@ -661,8 +661,11 @@ def edit_story(story_id):
             story.title = form.title.data
             story.synopsis = form.synopsis.data
             story.content = form.content.data
-            story.tags = form.tags.data.strip()  # Ensure no leading/trailing spaces
-            db.session.commit()
+            
+            # Process tags (split the string into a list)
+            tags_string = form.tags.data 
+            story.tags = tags_string.split(',') if tags_string else []  
+            
             db.session.commit()
             flash('Story successfully updated.', 'success')
             return redirect(url_for('view_story', story_id=story_id))
