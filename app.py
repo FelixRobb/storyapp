@@ -10,7 +10,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_sqlalchemy import SQLAlchemy
 from flask_argon2 import Argon2
 from flask_migrate import Migrate
-from sqlalchemy import func, or_, desc, nulls_last
+from sqlalchemy import func, or_, desc
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import aliased
 from datetime import datetime, timezone
 from flask_wtf import FlaskForm
@@ -156,13 +157,25 @@ class Story(db.Model):
     title = db.Column(db.String(255), nullable=False)
     synopsis = db.Column(db.String(1000), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    tags = db.Column(db.String(255))
+    tags_string = db.Column(db.String(255))  # Store tags as a comma-separated string
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     author = db.relationship('User', back_populates='stories')
     versions = db.relationship('Version', back_populates='story', foreign_keys="[Version.story_id]")
     comments = db.relationship('Comment', back_populates='story', lazy=True)
     saved_by_users = db.relationship('SavedStory', backref='story', lazy=True)
     edit_proposals = db.relationship('EditProposal', back_populates='story', lazy=True)
+    view_count = db.Column(db.Integer, default=0)  # New field for view count
+
+    @hybrid_property
+    def tags(self):
+        return self.tags_string.split(',') if self.tags_string else []
+
+    @tags.setter
+    def tags(self, value):
+        if isinstance(value, list):
+            self.tags_string = ','.join(value)
+        else:
+            self.tags_string = value
 
 
 # Saved story class
@@ -244,9 +257,9 @@ class LoginForm(FlaskForm):
  # Create story
 class CreateStoryForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    synopsis = StringField('Synopsis', validators=[DataRequired()])
+    synopsis = TextAreaField('Synopsis', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
-    tags = StringField('Tags')
+    tags = StringField('Tags')  # Add this line if the tags field is not already present
     submit = SubmitField('Create Story')
 
 
@@ -518,40 +531,44 @@ def create_story():
         title = form.title.data
         synopsis = form.synopsis.data
         content = form.content.data
-        tags = form.tags.data.split(',')
-        # Save content with actual newline characters
-        
+        tags = form.tags.data.split(',') if form.tags.data else []
+
         new_story = Story(
             title=title,
             synopsis=synopsis,
-            content=content,  # Save content with \n
-            tags=tags,
+            content=content,
             author=current_user
         )
+        new_story.tags = tags  # Set tags separately
 
-        # Create an initial version for the story
         initial_version = Version(
             date=datetime.utcnow(),
-            content=content.replace('\n', '<br>'),  # Convert newline characters to <br>
+            content=content.replace('\n', '<br>'),
             story=new_story
         )
 
-        
         db.session.add(new_story)
         db.session.add(initial_version)
         db.session.commit()
 
-        
-        # Redirect to the view_story endpoint with the newly created story's ID
         return redirect(url_for('view_story', story_id=new_story.id))
 
     return render_template('create_story.html', form=form)
 
 
+
 # Route to fetch the pre-established tags
-@app.route('/get_tags', methods=['GET'])
+@app.route('/get_tags')
 def get_tags():
-    return jsonify(tags=preestablished_tags)
+    tags = []
+    tags_file = os.path.join(app.static_folder, 'tags.txt')
+    try:
+        with open(tags_file, 'r') as file:
+            tags = [line.strip() for line in file.readlines() if line.strip()]
+    except FileNotFoundError:
+        tags = []
+
+    return jsonify({'tags': tags})
 
 
 # View story
@@ -561,6 +578,14 @@ def view_story(story_id):
     story = Story.query.get(story_id)
     versions = Version.query.filter_by(story=story).all()
     edit_proposals = EditProposal.query.filter_by(story=story, status='pending').all()
+
+    # Increment the view count
+    try:
+        story.view_count += 1
+    except TypeError:
+        story.view_count = 1
+    db.session.commit()
+
 
     if story:
         form = CommentForm()
@@ -633,7 +658,11 @@ def edit_story(story_id):
         form = EditForm(obj=story)
 
         if form.validate_on_submit():
-            form.populate_obj(story)  # Update the story with the form data
+            story.title = form.title.data
+            story.synopsis = form.synopsis.data
+            story.content = form.content.data
+            story.tags = form.tags.data.strip()  # Ensure no leading/trailing spaces
+            db.session.commit()
             db.session.commit()
             flash('Story successfully updated.', 'success')
             return redirect(url_for('view_story', story_id=story_id))
@@ -675,6 +704,8 @@ def edit_story(story_id):
         form.content.data = story.content
 
         return render_template('edit_story.html', form=form, story=story, is_author=is_author)
+
+
     
 
 # Edit proposal accept/decline route
@@ -707,30 +738,31 @@ def delete_story(story_id):
     story = Story.query.get(story_id)
 
     if story and story.author == current_user:
-        try:
+        # Delete associated records in comment table
+        Comment.query.filter_by(story_id=story_id).delete()
 
-            # Delete associated records in comment table
-            Comment.query.filter_by(story_id=story_id).delete()
+        # Delete associated records in version table
+        Version.query.filter_by(story_id=story_id).delete()
 
-            # Delete associated records in version table
-            Version.query.filter_by(story_id=story_id).delete()
+        # Delete associated records in edit_proposal table
+        EditProposal.query.filter_by(story_id=story_id).delete()
 
-            # Delete associated records in edit_proposal table
-            EditProposal.query.filter_by(story_id=story_id).delete()
+        # Delete associated records in saved_story table
+        SavedStory.query.filter_by(story_id=story_id).delete()
 
-            # Delete the story
-            db.session.delete(story)
-            
-            # Commit the changes
-            db.session.commit()
+        # Delete associated records in notification table
+        Notification.query.filter_by(story_id=story_id).delete()
 
-            return redirect(url_for('index'))
-        except Exception as e:
-            # Handle any exceptions and rollback changes
-            db.session.rollback()
+        # Delete the story
+        db.session.delete(story)
+        
+        # Commit the changes
+        db.session.commit()
 
+        return redirect(url_for('index'))
 
     return redirect(url_for('view_story', story_id=story_id))
+
 
     
 

@@ -139,6 +139,7 @@
             flex-wrap: wrap;
             margin-bottom: 15px;
         }
+
         .tag {
             background-color: #505050;
             color: #fff;
@@ -148,6 +149,7 @@
             display: flex;
             align-items: center;
         }
+
         .tag .remove-tag {
             background: none;
             border: none;
@@ -281,10 +283,11 @@
             updateChapterList();
         });
     </script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             let allTags = [];
+            const tagsInput = document.getElementById('tags');
+            const tagsContainer = document.querySelector('.tags-container');
 
             function fetchTags() {
                 fetch('/get_tags')
@@ -301,10 +304,24 @@
                     .catch(error => console.error('Error fetching tags:', error));
             }
 
-            fetchTags();
+            function updateHiddenTagsField() {
+                const tags = [...tagsContainer.children].map(el => el.textContent.trim().slice(0, -1));
+                document.getElementById('hidden-tags').value = tags.join(',');
+            }
 
-            const tagsInput = document.getElementById('tags');
-            const tagsContainer = document.querySelector('.tags-container');
+            function addTag(tag) {
+                if (allTags.includes(tag) && ![...tagsContainer.children].some(el => el.textContent.trim().slice(0, -1) === tag)) {
+                    const tagElement = document.createElement('div');
+                    tagElement.classList.add('tag');
+                    tagElement.innerHTML = `${tag} <button class="remove-tag">x</button>`;
+                    tagElement.querySelector('.remove-tag').addEventListener('click', () => {
+                        tagsContainer.removeChild(tagElement);
+                        updateHiddenTagsField();
+                    });
+                    tagsContainer.appendChild(tagElement);
+                    updateHiddenTagsField();
+                }
+            }
 
             tagsInput.addEventListener('input', function (e) {
                 const value = e.target.value;
@@ -322,20 +339,9 @@
                 }
             });
 
-            function addTag(tag) {
-                if (allTags.includes(tag) && ![...tagsContainer.children].some(el => el.textContent.trim() === tag)) {
-                    const tagElement = document.createElement('div');
-                    tagElement.classList.add('tag');
-                    tagElement.innerHTML = `${tag} <button class="remove-tag">x</button>`;
-                    tagElement.querySelector('.remove-tag').addEventListener('click', () => {
-                        tagsContainer.removeChild(tagElement);
-                    });
-                    tagsContainer.appendChild(tagElement);
-                }
-            }
+            fetchTags();
         });
     </script>
-
 
 </head>
 
@@ -390,8 +396,9 @@
                 <input type="text" id="tags" placeholder="Start typing tags...">
                 <datalist id="tagList"></datalist>
                 <div class="tags-container"></div>
+                <input type="hidden" id="hidden-tags" name="tags">
 
-                
+
                 <button type="submit">Create Story</button>
             </form>
         </div>

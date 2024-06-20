@@ -89,54 +89,116 @@
             align-items: center;
             justify-content: center;
         }
-
     </style>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Function to update the chapter list
-        function updateChapterList() {
-            // Get the content from the textarea
-            const content = document.querySelector('textarea[name="content"]').value;
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Function to update the chapter list
+            function updateChapterList() {
+                // Get the content from the textarea
+                const content = document.querySelector('textarea[name="content"]').value;
 
-            // Regular expression to match chapter definitions
-            const chapterRegex = /Chapter (\d+) ([^\n\r]+)(?=(?:Chapter \d+ |[\s\S]*?(?=$)))/g;
-            let match;
-            const chapterList = [];
+                // Regular expression to match chapter definitions
+                const chapterRegex = /Chapter (\d+) ([^\n\r]+)(?=(?:Chapter \d+ |[\s\S]*?(?=$)))/g;
+                let match;
+                const chapterList = [];
 
-            // Iterate over matches and populate chapterList
-            while ((match = chapterRegex.exec(content)) !== null) {
-                const chapterNumber = match[1];
-                const chapterTitle = match[2];
+                // Iterate over matches and populate chapterList
+                while ((match = chapterRegex.exec(content)) !== null) {
+                    const chapterNumber = match[1];
+                    const chapterTitle = match[2];
 
-                // Check if the chapter number already exists
-                if (chapterList.some(chapter => chapter.number === chapterNumber)) {
-                    alert('Warning: Two chapters cannot have the same number.');
-                    return;
+                    // Check if the chapter number already exists
+                    if (chapterList.some(chapter => chapter.number === chapterNumber)) {
+                        alert('Warning: Two chapters cannot have the same number.');
+                        return;
+                    }
+
+                    chapterList.push({ number: chapterNumber, title: chapterTitle });
                 }
 
-                chapterList.push({ number: chapterNumber, title: chapterTitle });
+                // Update the chapter list display
+                const chapterListElement = document.getElementById('chapter-list');
+                chapterListElement.innerHTML = '<h3>Chapters</h3><ul>';
+                chapterList.forEach(chapter => {
+                    const chapterItem = document.createElement('li');
+                    chapterItem.textContent = `Chapter ${chapter.number}: ${chapter.title}`;
+                    chapterListElement.appendChild(chapterItem);
+                });
+                chapterListElement.innerHTML += '</ul>';
             }
 
-            // Update the chapter list display
-            const chapterListElement = document.getElementById('chapter-list');
-            chapterListElement.innerHTML = '<h3>Chapters</h3><ul>';
-            chapterList.forEach(chapter => {
-                const chapterItem = document.createElement('li');
-                chapterItem.textContent = `Chapter ${chapter.number}: ${chapter.title}`;
-                chapterListElement.appendChild(chapterItem);
-            });
-            chapterListElement.innerHTML += '</ul>';
+            // Add event listener for textarea input
+            const contentTextarea = document.querySelector('textarea[name="content"]');
+            contentTextarea.addEventListener('input', updateChapterList);
+
+            // Initial update on page load
+            updateChapterList();
+        });
+    </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let allTags = [];
+        const tagsInput = document.getElementById('tags');
+        const tagsContainer = document.querySelector('.tags-container');
+        const hiddenTagsInput = document.getElementById('hidden-tags');
+
+        function fetchTags() {
+            fetch('/get_tags')
+                .then(response => response.json())
+                .then(data => {
+                    allTags = data.tags;
+                    const tagList = document.getElementById('tagList');
+                    allTags.forEach(tag => {
+                        const option = document.createElement('option');
+                        option.value = tag;
+                        tagList.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching tags:', error));
         }
 
-        // Add event listener for textarea input
-        const contentTextarea = document.querySelector('textarea[name="content"]');
-        contentTextarea.addEventListener('input', updateChapterList);
+        function updateHiddenTagsField() {
+            const tags = [...tagsContainer.children].map(el => el.textContent.trim().slice(0, -1));
+            hiddenTagsInput.value = tags.join(' ,');
+        }
 
-        // Initial update on page load
-        updateChapterList();
+        function addTag(tag) {
+            if (allTags.includes(tag) && ![...tagsContainer.children].some(el => el.textContent.trim().slice(0, -1) === tag)) {
+                const tagElement = document.createElement('div');
+                tagElement.classList.add('tag');
+                tagElement.innerHTML = `${tag} <button class="remove-tag">x</button>`;
+                tagElement.querySelector('.remove-tag').addEventListener('click', () => {
+                    tagsContainer.removeChild(tagElement);
+                    updateHiddenTagsField();
+                });
+                tagsContainer.appendChild(tagElement);
+                updateHiddenTagsField();
+            }
+        }
+
+        tagsInput.addEventListener('input', function (e) {
+            const value = e.target.value;
+            const lastWord = value.split(' ').pop();
+
+            if (lastWord.length > 0) {
+                $(this).autocomplete({
+                    source: allTags.filter(tag => tag.startsWith(lastWord)),
+                    select: function (event, ui) {
+                        addTag(ui.item.value);
+                        tagsInput.value = '';  // Clear the input
+                        return false;
+                    }
+                });
+            }
+        });
+
+        fetchTags();
     });
 </script>
+
+
 
 </head>
 
@@ -157,7 +219,8 @@
                 <input type="text" id="title" name="title" value="{{ story.title }}" required>
 
                 <label for="synopsis">Synopsis:</label>
-                <textarea style="max-height: 30px;" id="synopsis" name="synopsis" required>{{ story.synopsis }}</textarea>
+                <textarea style="max-height: 30px;" id="synopsis" name="synopsis"
+                    required>{{ story.synopsis }}</textarea>
 
                 <div id="chapter-list" class="chapter-list"></div>
 
@@ -165,17 +228,27 @@
                 <textarea style="min-height: 150px;" name="content" required>{{ story.content }}</textarea>
 
                 <label for="tags">Tags:</label>
-                <input type="text" id="tags" name="tags" value="{{ story.tags }}">
+<input type="text" id="tags" placeholder="Start typing tags...">
+<datalist id="tagList"></datalist>
+<div class="tags-container">
+    {% for tag in story.tags.split(' ,') %}
+        <div class="tag">{{ tag }} <button class="remove-tag">x</button></div>
+    {% endfor %}
+</div>
+<input type="hidden" id="hidden-tags" name="tags" value="{{ story.tags }}">
+
+
+
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                    {% for category, message in messages if category == 'login' %}
-                    <div class="flash-messages">
-                        {{ message }}
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-                    {% endwith %}
+                {% if messages %}
+                {% for category, message in messages if category == 'login' %}
+                <div class="flash-messages">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
 
                 <button type="submit">Save Changes</button>
 

@@ -45,6 +45,16 @@
             margin-bottom: 10px;
         }
 
+        .tag {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
         .story-box {
             border: 2px solid #4CAF50;
             padding: 20px;
@@ -56,11 +66,12 @@
             margin-right: auto;
         }
 
-				    .title {
-				    				font-size: 20px;
-				    				font-weight: 600;
-				    				color: #fff
-				    }
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff
+        }
+
         .content {
             margin-bottom: 20px;
 
@@ -333,7 +344,16 @@
             <div class="content-excerpt" id="contentExcerpt">
                 {{ story.content.replace('\n', '<br>')|safe }}
             </div>
-            <p><strong>Tags:</strong> {{ story.tags }}</p>
+
+
+            <p><strong>Tags:</strong>
+                {% for tag in story.tags %}
+                    <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </p>
+
+
+
             <p><strong>Comments:</strong></p>
             <ul class="list">
                 {% for comment in story.comments %}

@@ -10,7 +10,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_sqlalchemy import SQLAlchemy
 from flask_argon2 import Argon2
 from flask_migrate import Migrate
-from sqlalchemy import func, or_, desc, nulls_last
+from sqlalchemy import func, or_, desc
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import aliased
 from datetime import datetime, timezone
 from flask_wtf import FlaskForm
@@ -131,7 +132,6 @@ class User(db.Model, UserMixin):
 
     def has_unread_notifications(self):
         unread_notifications = Notification.query.filter_by(user_id=self.id, read=False).count()
-        print(f"Unread notifications count for user {self.id}: {unread_notifications}")
         return unread_notifications > 0
 
 # Send emails
@@ -157,13 +157,25 @@ class Story(db.Model):
     title = db.Column(db.String(255), nullable=False)
     synopsis = db.Column(db.String(1000), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    tags = db.Column(db.String(255))
+    tags_string = db.Column(db.String(255))  # Store tags as a comma-separated string
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     author = db.relationship('User', back_populates='stories')
     versions = db.relationship('Version', back_populates='story', foreign_keys="[Version.story_id]")
     comments = db.relationship('Comment', back_populates='story', lazy=True)
     saved_by_users = db.relationship('SavedStory', backref='story', lazy=True)
     edit_proposals = db.relationship('EditProposal', back_populates='story', lazy=True)
+    view_count = db.Column(db.Integer, default=0)  # New field for view count
+
+    @hybrid_property
+    def tags(self):
+        return self.tags_string.split(',') if self.tags_string else []
+
+    @tags.setter
+    def tags(self, value):
+        if isinstance(value, list):
+            self.tags_string = ','.join(value)
+        else:
+            self.tags_string = value
 
 
 # Saved story class
@@ -245,9 +257,9 @@ class LoginForm(FlaskForm):
  # Create story
 class CreateStoryForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    synopsis = StringField('Synopsis', validators=[DataRequired()])
+    synopsis = TextAreaField('Synopsis', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
-    tags = StringField('Tags')
+    tags = StringField('Tags')  # Add this line if the tags field is not already present
     submit = SubmitField('Create Story')
 
 
@@ -337,7 +349,7 @@ def favicon():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.query(User).get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # Entry Page
@@ -473,8 +485,19 @@ def search_results():
 
             return render_template('search_results.html', query=search_query, story_results=story_results, user_results=user_results)
 
-    return render_template('search_results.html', query=None, story_results=None, user_results=None)
+    # Handle subsequent searches from the search results page
+    search_query = request.args.get('query', '').strip()
+    if search_query:
+        # Search within the search results
+        story_results = Story.query.filter(
+            or_(Story.title.ilike(f'%{search_query}%'), Story.tags.ilike(f'%{search_query}%'))
+        ).all()
 
+        user_results = User.query.filter(User.username.ilike(f'%{search_query}%')).all()
+
+        return render_template('search_results.html', query=search_query, story_results=story_results, user_results=user_results)
+
+    return render_template('search_results.html', query=None, story_results=None, user_results=None)
 
 @app.route('/story/<int:story_id>/save', methods=['POST'])
 @login_required
@@ -508,40 +531,44 @@ def create_story():
         title = form.title.data
         synopsis = form.synopsis.data
         content = form.content.data
-        tags = form.tags.data
+        tags = form.tags.data.split(',') if form.tags.data else []
 
-        # Save content with actual newline characters
         new_story = Story(
             title=title,
             synopsis=synopsis,
-            content=content,  # Save content with \n
-            tags=tags,
+            content=content,
             author=current_user
         )
+        new_story.tags = tags  # Set tags separately
 
-        # Create an initial version for the story
         initial_version = Version(
             date=datetime.utcnow(),
-            content=content.replace('\n', '<br>'),  # Convert newline characters to <br>
+            content=content.replace('\n', '<br>'),
             story=new_story
         )
 
-        
         db.session.add(new_story)
         db.session.add(initial_version)
         db.session.commit()
 
-        
-        # Redirect to the view_story endpoint with the newly created story's ID
         return redirect(url_for('view_story', story_id=new_story.id))
 
     return render_template('create_story.html', form=form)
 
 
+
 # Route to fetch the pre-established tags
-@app.route('/get_tags', methods=['GET'])
+@app.route('/get_tags')
 def get_tags():
-    return jsonify(tags=preestablished_tags)
+    tags = []
+    tags_file = os.path.join(app.static_folder, 'tags.txt')
+    try:
+        with open(tags_file, 'r') as file:
+            tags = [line.strip() for line in file.readlines() if line.strip()]
+    except FileNotFoundError:
+        tags = []
+
+    return jsonify({'tags': tags})
 
 
 # View story
@@ -551,6 +578,14 @@ def view_story(story_id):
     story = Story.query.get(story_id)
     versions = Version.query.filter_by(story=story).all()
     edit_proposals = EditProposal.query.filter_by(story=story, status='pending').all()
+
+    # Increment the view count
+    try:
+        story.view_count += 1
+    except TypeError:
+        story.view_count = 1
+    db.session.commit()
+
 
     if story:
         form = CommentForm()
@@ -565,9 +600,28 @@ def view_story(story_id):
 @app.route('/saved_stories')
 @login_required
 def saved_stories():
-    saved_stories = SavedStory.query.filter_by(user_id=current_user.id).all()
-    print("saved_stories: ", saved_stories)
-    return render_template('saved_stories.html', saved_stories=saved_stories)
+    # Retrieve the saved story IDs for the current user
+    saved_story_ids = [saved_story.story_id for saved_story in current_user.saved_stories]
+
+    # Fetch the details of the saved stories from the Story table
+    saved_stories = Story.query.filter(Story.id.in_(saved_story_ids)).all()
+
+    # Create a list to store the saved story information
+    saved_story_info = []
+
+    for story in saved_stories:
+        story_info = {
+            'id': story.id,
+            'title': story.title,
+            'author': story.author.username,
+            'synopsis': story.synopsis,
+            'content': story.content,
+            # Add any other fields you want to display
+        }
+        saved_story_info.append(story_info)
+        print(saved_story_info)
+
+    return render_template('saved_stories.html', saved_story_info=saved_story_info)
 
 # Search saved stories
 @app.route('/search_saved_stories', methods=['GET'])
@@ -678,28 +732,24 @@ def delete_story(story_id):
     story = Story.query.get(story_id)
 
     if story and story.author == current_user:
-        try:
+        
 
-            # Delete associated records in comment table
-            Comment.query.filter_by(story_id=story_id).delete()
+        # Delete associated records in comment table
+        Comment.query.filter_by(story_id=story_id).delete()
 
-            # Delete associated records in version table
-            Version.query.filter_by(story_id=story_id).delete()
+        # Delete associated records in version table
+        Version.query.filter_by(story_id=story_id).delete()
 
-            # Delete associated records in edit_proposal table
-            EditProposal.query.filter_by(story_id=story_id).delete()
+        # Delete associated records in edit_proposal table
+        EditProposal.query.filter_by(story_id=story_id).delete()
 
-            # Delete the story
-            db.session.delete(story)
+        # Delete the story
+        db.session.delete(story)
             
-            # Commit the changes
-            db.session.commit()
+        # Commit the changes
+        db.session.commit()
 
-            return redirect(url_for('index'))
-        except Exception as e:
-            # Handle any exceptions and rollback changes
-            db.session.rollback()
-
+        return redirect(url_for('index'))
 
     return redirect(url_for('view_story', story_id=story_id))
 
@@ -837,24 +887,16 @@ def user_relations():
     return render_template('user_relations.html', user=user, followed_users=followed_users, followers=followers, suggested_users=suggested_users)
 
 
-# Notifications
-@app.route('/notifications')
-@login_required
-def notifications():
-    # Mark all notifications as read when the user views the notifications page
-    user_notifications = Notification.query.filter_by(user_id=current_user.id).all()
-    for notification in user_notifications:
-        notification.read = True
-
-    db.session.commit()
-
-    # Fetch and display notifications
-    user_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
-    # Extracting story IDs from notifications
-    story_id = [notification.story_id for notification in user_notifications]
-    return render_template('notifications.html', notifications=user_notifications, story_id=story_id)
 
 
+
+
+
+
+# see email
+@app.route('/see_email')
+def see_email():
+    return render_template('see_email.html')
 
 # Run app
 if __name__ == "__main__":
