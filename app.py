@@ -173,9 +173,12 @@ class Story(db.Model):
     @tags.setter
     def tags(self, value):
         if isinstance(value, list):
-            self.tags_string = ','.join(value)
+            self.tags_string = ','.join([tag.strip() for tag in value])
+        elif isinstance(value, str):
+            self.tags_string = ','.join([tag.strip() for tag in value.split(',')])
         else:
             self.tags_string = value
+
 
 
 # Saved story class
@@ -521,7 +524,6 @@ def save_story(story_id):
         db.session.commit()
         return jsonify({'status': 'saved'})
 
-# Create story
 @app.route('/create_story', methods=['GET', 'POST'])
 @login_required
 def create_story():
@@ -531,15 +533,15 @@ def create_story():
         title = form.title.data
         synopsis = form.synopsis.data
         content = form.content.data
-        tags = form.tags.data.split(',') if form.tags.data else []
+        tags = [tag.strip() for tag in form.tags.data.split(',') if tag.strip()]
 
         new_story = Story(
             title=title,
             synopsis=synopsis,
             content=content,
-            author=current_user
+            author=current_user,
+            tags=tags  # Set tags as a list
         )
-        new_story.tags = tags  # Set tags separately
 
         initial_version = Version(
             date=datetime.utcnow(),
@@ -554,6 +556,7 @@ def create_story():
         return redirect(url_for('view_story', story_id=new_story.id))
 
     return render_template('create_story.html', form=form)
+
 
 
 
@@ -650,11 +653,9 @@ def edit_story(story_id):
     if not story:
         return redirect(url_for('index'))
 
-    # Check if the current user is the author of the story
     is_author = current_user == story.author
 
     if is_author:
-        # If the current user is the author, allow editing all fields directly
         form = EditForm(obj=story)
 
         if form.validate_on_submit():
@@ -662,24 +663,23 @@ def edit_story(story_id):
             story.synopsis = form.synopsis.data
             story.content = form.content.data
             
-            # Process tags (split the string into a list)
             tags_string = form.tags.data
             tags = [tag.strip() for tag in tags_string.split(',') if tag.strip()]
-            story.tags = ','.join(tags)
+            story.tags = tags  # Set tags as a list
             
             db.session.commit()
             flash('Story successfully updated.', 'success')
             return redirect(url_for('view_story', story_id=story_id))
         
+        form.tags.data = story.tags_string  # Provide the comma-separated string to the template
         return render_template('author_edit_story.html', form=form, story=story, is_author=is_author)
+
     else:
-        # If the current user is not the author, allow editing only the content and create an edit proposal
         form = ContentEditForm()
 
         if form.validate_on_submit():
             content = form.content.data
 
-            # Create an edit proposal for the story
             edit_proposal = EditProposal(
                 content=content,
                 status='pending',
@@ -690,7 +690,6 @@ def edit_story(story_id):
             db.session.add(edit_proposal)
             db.session.commit()
 
-            # Create a notification for the author
             notification_content = f"New edit proposal for your story '{story.title}'."
             notification = Notification(
                 content=notification_content,
@@ -704,9 +703,7 @@ def edit_story(story_id):
 
             return redirect(url_for('view_story', story_id=story_id))
 
-        # Prepopulate form field with current story content
         form.content.data = story.content
-
         return render_template('edit_story.html', form=form, story=story, is_author=is_author)
 
 
