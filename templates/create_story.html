@@ -288,6 +288,7 @@
             let allTags = [];
             const tagsInput = document.getElementById('tags');
             const tagsContainer = document.querySelector('.tags-container');
+            const hiddenTagsInput = document.getElementById('hidden-tags');
 
             function fetchTags() {
                 fetch('/get_tags')
@@ -305,15 +306,16 @@
             }
 
             function updateHiddenTagsField() {
-                const tags = [...tagsContainer.children].map(el => el.textContent.trim().slice(0, -1));
-                document.getElementById('hidden-tags').value = tags.join(',');
+                const tags = [...tagsContainer.children].map(el => el.textContent.trim().slice(0, -1));  // Remove the 'x' character
+                hiddenTagsInput.value = tags.join(',');
             }
 
             function addTag(tag) {
-                if (allTags.includes(tag) && ![...tagsContainer.children].some(el => el.textContent.trim().slice(0, -1) === tag)) {
+                const sanitizedTag = tag.trim();
+                if (allTags.includes(sanitizedTag) && ![...tagsContainer.children].some(el => el.textContent.trim().slice(0, -1) === sanitizedTag)) {
                     const tagElement = document.createElement('div');
                     tagElement.classList.add('tag');
-                    tagElement.innerHTML = `${tag} <button class="remove-tag">x</button>`;
+                    tagElement.innerHTML = `${sanitizedTag} <button class="remove-tag">x</button>`;
                     tagElement.querySelector('.remove-tag').addEventListener('click', () => {
                         tagsContainer.removeChild(tagElement);
                         updateHiddenTagsField();
@@ -324,7 +326,7 @@
             }
 
             tagsInput.addEventListener('input', function (e) {
-                const value = e.target.value;
+                const value = e.target.value.trim();
                 const lastWord = value.split(' ').pop();
 
                 if (lastWord.length > 0) {
@@ -342,6 +344,7 @@
             fetchTags();
         });
     </script>
+
 
 </head>
 

@@ -663,8 +663,9 @@ def edit_story(story_id):
             story.content = form.content.data
             
             # Process tags (split the string into a list)
-            tags_string = form.tags.data 
-            story.tags = tags_string.split(',') if tags_string else []  
+            tags_string = form.tags.data
+            tags = [tag.strip() for tag in tags_string.split(',') if tag.strip()]
+            story.tags = ','.join(tags)
             
             db.session.commit()
             flash('Story successfully updated.', 'success')
