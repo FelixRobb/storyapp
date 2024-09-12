@@ -168,16 +168,20 @@ class Story(db.Model):
 
     @hybrid_property
     def tags(self):
+        print(f"Getting tags: {self.tags_string}")
         return self.tags_string.split(',') if self.tags_string else []
+
 
     @tags.setter
     def tags(self, value):
+        print(f"Setting tags: {value}")
         if isinstance(value, list):
             self.tags_string = ','.join([tag.strip() for tag in value])
         elif isinstance(value, str):
             self.tags_string = ','.join([tag.strip() for tag in value.split(',')])
         else:
             self.tags_string = value
+        print(f"tags_string set to: {self.tags_string}")
 
 
 
@@ -534,6 +538,7 @@ def create_story():
         synopsis = form.synopsis.data
         content = form.content.data
         tags = [tag.strip() for tag in form.tags.data.split(',') if tag.strip()]
+        print(f"Creating story with tags: {tags}")
 
         new_story = Story(
             title=title,
@@ -553,6 +558,7 @@ def create_story():
         db.session.add(initial_version)
         db.session.commit()
 
+        print(f"Story created with tags_string: {new_story.tags_string}")
         return redirect(url_for('view_story', story_id=new_story.id))
 
     return render_template('create_story.html', form=form)
@@ -665,10 +671,12 @@ def edit_story(story_id):
             
             tags_string = form.tags.data
             tags = [tag.strip() for tag in tags_string.split(',') if tag.strip()]
+            print(f"Editing story with tags: {tags}")
             story.tags = tags  # Set tags as a list
             
             db.session.commit()
             flash('Story successfully updated.', 'success')
+            print(f"Story updated with tags_string: {story.tags_string}")
             return redirect(url_for('view_story', story_id=story_id))
         
         form.tags.data = story.tags_string  # Provide the comma-separated string to the template
