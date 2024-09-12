@@ -183,6 +183,7 @@
                         option.value = tag;
                         tagList.appendChild(option);
                     });
+                    console.log('Fetched tags:', allTags);
                 })
                 .catch(error => console.error('Error fetching tags:', error));
         }
@@ -190,6 +191,7 @@
         function updateHiddenTagsField() {
             const tags = [...tagsContainer.children].map(el => el.textContent.trim().slice(0, -1));  // Remove the 'x' character
             hiddenTagsInput.value = tags.join(',');
+            console.log('Updated hidden tags field:', hiddenTagsInput.value);
         }
 
         function addTag(tag) {
@@ -204,6 +206,7 @@
                 });
                 tagsContainer.appendChild(tagElement);
                 updateHiddenTagsField();
+                console.log('Added tag:', sanitizedTag);
             }
         }
 
@@ -223,24 +226,9 @@
             }
         });
 
-        // Function to initialize tags in edit mode
-        function initializeTags() {
-            const initialTags = hiddenTagsInput.value.split(',');
-            initialTags.forEach(tag => {
-                if (tag.trim()) {
-                    addTag(tag);
-                }
-            });
-        }
-
         fetchTags();
-        initializeTags();
     });
 </script>
-
-
-
-
 
 
 
@@ -272,15 +260,15 @@
                 <textarea style="min-height: 150px;" name="content" required>{{ story.content }}</textarea>
 
                 <label for="tags">Tags:</label>
-<input type="text" id="tags" placeholder="Start typing tags...">
-<datalist id="tagList"></datalist>
-<div class="tags-container">
-   {% for tag in story.tags %}
+                <input type="text" id="tags" placeholder="Start typing tags...">
+                <datalist id="tagList"></datalist>
+                <div class="tags-container">
+                    {% for tag in story.tags %}
 
-        <div class="tag">{{ tag }} <button class="remove-tag">x</button></div>
-    {% endfor %}
-</div>
-<input type="hidden" id="hidden-tags" name="tags" value="{{ story.tags }}">
+                    <div class="tag">{{ tag }} <button class="remove-tag">x</button></div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" id="hidden-tags" name="tags" value="{{ story.tags }}">
 
 
 

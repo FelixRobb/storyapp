@@ -283,67 +283,72 @@
             updateChapterList();
         });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let allTags = [];
-            const tagsInput = document.getElementById('tags');
-            const tagsContainer = document.querySelector('.tags-container');
-            const hiddenTagsInput = document.getElementById('hidden-tags');
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let allTags = [];
+        const tagsInput = document.getElementById('tags');
+        const tagsContainer = document.querySelector('.tags-container');
+        const hiddenTagsInput = document.getElementById('hidden-tags');
 
-            function fetchTags() {
-                fetch('/get_tags')
-                    .then(response => response.json())
-                    .then(data => {
-                        allTags = data.tags;
-                        const tagList = document.getElementById('tagList');
-                        allTags.forEach(tag => {
-                            const option = document.createElement('option');
-                            option.value = tag;
-                            tagList.appendChild(option);
-                        });
-                    })
-                    .catch(error => console.error('Error fetching tags:', error));
-            }
-
-            function updateHiddenTagsField() {
-                const tags = [...tagsContainer.children].map(el => el.textContent.trim().slice(0, -1));  // Remove the 'x' character
-                hiddenTagsInput.value = tags.join(',');
-            }
-
-            function addTag(tag) {
-                const sanitizedTag = tag.trim();
-                if (allTags.includes(sanitizedTag) && ![...tagsContainer.children].some(el => el.textContent.trim().slice(0, -1) === sanitizedTag)) {
-                    const tagElement = document.createElement('div');
-                    tagElement.classList.add('tag');
-                    tagElement.innerHTML = `${sanitizedTag} <button class="remove-tag">x</button>`;
-                    tagElement.querySelector('.remove-tag').addEventListener('click', () => {
-                        tagsContainer.removeChild(tagElement);
-                        updateHiddenTagsField();
+        function fetchTags() {
+            fetch('/get_tags')
+                .then(response => response.json())
+                .then(data => {
+                    allTags = data.tags;
+                    const tagList = document.getElementById('tagList');
+                    allTags.forEach(tag => {
+                        const option = document.createElement('option');
+                        option.value = tag;
+                        tagList.appendChild(option);
                     });
-                    tagsContainer.appendChild(tagElement);
+                    console.log('Fetched tags:', allTags);
+                })
+                .catch(error => console.error('Error fetching tags:', error));
+        }
+
+        function updateHiddenTagsField() {
+            const tags = [...tagsContainer.children].map(el => el.textContent.trim().slice(0, -1));  // Remove the 'x' character
+            hiddenTagsInput.value = tags.join(',');
+            console.log('Updated hidden tags field:', hiddenTagsInput.value);
+        }
+
+        function addTag(tag) {
+            const sanitizedTag = tag.trim();
+            if (allTags.includes(sanitizedTag) && ![...tagsContainer.children].some(el => el.textContent.trim().slice(0, -1) === sanitizedTag)) {
+                const tagElement = document.createElement('div');
+                tagElement.classList.add('tag');
+                tagElement.innerHTML = `${sanitizedTag} <button class="remove-tag">x</button>`;
+                tagElement.querySelector('.remove-tag').addEventListener('click', () => {
+                    tagsContainer.removeChild(tagElement);
                     updateHiddenTagsField();
-                }
+                });
+                tagsContainer.appendChild(tagElement);
+                updateHiddenTagsField();
+                console.log('Added tag:', sanitizedTag);
             }
+        }
 
-            tagsInput.addEventListener('input', function (e) {
-                const value = e.target.value.trim();
-                const lastWord = value.split(' ').pop();
+        tagsInput.addEventListener('input', function (e) {
+            const value = e.target.value.trim();
+            const lastWord = value.split(' ').pop();
 
-                if (lastWord.length > 0) {
-                    $(this).autocomplete({
-                        source: allTags.filter(tag => tag.startsWith(lastWord)),
-                        select: function (event, ui) {
-                            addTag(ui.item.value);
-                            tagsInput.value = '';  // Clear the input
-                            return false;
-                        }
-                    });
-                }
-            });
-
-            fetchTags();
+            if (lastWord.length > 0) {
+                $(this).autocomplete({
+                    source: allTags.filter(tag => tag.startsWith(lastWord)),
+                    select: function (event, ui) {
+                        addTag(ui.item.value);
+                        tagsInput.value = '';  // Clear the input
+                        return false;
+                    }
+                });
+            }
         });
-    </script>
+
+        fetchTags();
+    });
+</script>
+
+
 
 
 </head>
